@@ -64,19 +64,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Transposition from Fourier space distribution to spectral space distribution
 
 IF (LHOOK) CALL DR_HOOK('ELTDIR_CTL_MOD:ELTDIR_CTL',0,ZHOOK_HANDLE)
+
+!$acc update host(FOUBUF_IN) async(1)
+!$acc wait(1)
+
 IBLEN = D%NLENGT0B*2*KF_FS
-IF (ALLOCATED(FOUBUF)) THEN
-  IF (MAX(1,IBLEN) > SIZE(FOUBUF)) THEN
-    DEALLOCATE(FOUBUF)
-    ALLOCATE(FOUBUF(MAX(1,IBLEN)))
-  ENDIF
-ELSE
-  ALLOCATE(FOUBUF(MAX(1,IBLEN)))
-ENDIF
 CALL GSTATS(153,0)
 CALL TRLTOM(FOUBUF_IN,FOUBUF,2*KF_FS)
 CALL GSTATS(153,1)
-IF (.NOT.LALLOPERM) DEALLOCATE(FOUBUF_IN)
 
 ! Periodization of auxiliary fields in y direction
 
@@ -97,7 +92,6 @@ IF(KF_FS>0) THEN
 ENDIF
 CALL GSTATS(1645,1)
   
-IF (.NOT.LALLOPERM) DEALLOCATE(FOUBUF)
 IF (LHOOK) CALL DR_HOOK('ELTDIR_CTL_MOD:ELTDIR_CTL',1,ZHOOK_HANDLE)
 
 !     -----------------------------------------------------------------
