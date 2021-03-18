@@ -18,6 +18,8 @@ USE EUPDSP_MOD      ,ONLY : EUPDSP
 USE EUVTVD_COMM_MOD 
 USE EXTPER_MOD      ,ONLY : EXTPER
 
+USE TPMALD_FIELDS   ,ONLY : ZFFA
+
 !
 !**** *ELTDIR* - Control of Direct Legendre transform step
 
@@ -110,16 +112,13 @@ IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',0,ZHOOK_HANDLE)
 !*     1.    PREPARE WORK ARRAYS.
 !            --------------------
 
-  CALL ABOR1 ('BROKEN EPRFI2')
-! CALL EPRFI2(KF_FS,ZAIA,ZSIA)
-! CALL EPRFI2(IM,JM,KF_FS,ZFFT(:,:,JM))
-
+  CALL EPRFI2(KF_FS,ZFFA)
 
 !*     2.    PERIODICIZATION IN Y DIRECTION
 !            ------------------------------
 
   IF(R%NNOEXTZG>0) THEN
-    CALL ABOR1 ('')
+    CALL ABOR1 ('BROKEN R%NNOEXTZG>0')
 !   DO JF = 1,IFC
 !     DO JDIM = 1,R%NDGL
 !       ZFFT2(JF,JDIM)=ZFFT(JDIM,JF,JM)
