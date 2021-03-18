@@ -1,6 +1,6 @@
 MODULE EPRFI2_MOD
 CONTAINS
-SUBROUTINE EPRFI2(KM,KMLOC,KF_FS,PFFT)
+SUBROUTINE EPRFI2(KF_FS,PFFA)
 
 !**** *EPRFI2* - Prepare input work arrays for direct transform
 
@@ -56,7 +56,7 @@ SUBROUTINE EPRFI2(KM,KMLOC,KF_FS,PFFT)
 !        M.Hamrud      01-Oct-2003 CY28 Cleaning
 !     ------------------------------------------------------------------
 
-USE PARKIND1  ,ONLY : JPIM     ,JPRB
+USE PARKIND1  ,ONLY : JPIM     ,JPRBT
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
 !USE TPM_TRANS
@@ -66,18 +66,16 @@ USE EPRFI2B_MOD     ,ONLY : EPRFI2B
 
 IMPLICIT NONE
 
-INTEGER(KIND=JPIM) , INTENT(IN) :: KM
-INTEGER(KIND=JPIM) , INTENT(IN) :: KMLOC
 INTEGER(KIND=JPIM) , INTENT(IN) :: KF_FS
 
-REAL(KIND=JPRB) , INTENT(OUT) :: PFFT(:,:)
+REAL(KIND=JPRBT) , INTENT(OUT) :: PFFA(:,:,:)
 
 !     ------------------------------------------------------------------
 
 !*       2.    EXTRACT SYM./ANTISYM. FIELDS FROM TIME T+1.
 !              -------------------------------------------
 
-CALL EPRFI2B(KF_FS,KM,KMLOC,PFFT)
+CALL EPRFI2B(KF_FS,PFFA)
 
 !     ------------------------------------------------------------------
 
