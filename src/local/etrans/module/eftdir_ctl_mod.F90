@@ -58,6 +58,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE TPM_DIM         ,ONLY : R
 !USE TPMALD_DIM      ,ONLY : RALD
 !USE TPM_GEOMETRY
+USE TPM_TRANS       ,ONLY : ZGTF
 USE TPM_TRANS       ,ONLY : FOUBUF_IN
 USE TPM_DISTR       ,ONLY : D
 
@@ -87,7 +88,6 @@ EXTERNAL AUX_PROC
 OPTIONAL AUX_PROC
 
 ! Local variables
-REAL(KIND=JPRB) :: ZGTF(KF_FS,D%NLENGTF)
 REAL(KIND=JPRB) :: ZDUM
 INTEGER(KIND=JPIM) :: IST,INUL,JGL,IGL,IBLEN
 INTEGER(KIND=JPIM) :: IVSETUV(KF_UV_G)
@@ -147,6 +147,17 @@ ENDIF
 
 ! Transposition
 
+IF (.FALSE.) THEN
+BLOCK
+  INTEGER (KIND=JPIM) :: JFLD
+  WRITE (88, *) "----------"
+  DO JFLD = 1, SIZE (PGP, 2)
+    WRITE (88, *) PGP (:,JFLD)
+  ENDDO
+  WRITE (88, *) "----------"
+ENDBLOCK
+ENDIF
+
 CALL GSTATS(158,0)
 
 !debug
@@ -178,6 +189,9 @@ ELSE
   ENDIF
 ENDIF
 
+
+!#acc update device (ZGTF)
+
 ! Fourier transform
 
 CALL GSTATS(1640,0)
@@ -189,7 +203,6 @@ IF(KF_FS>0) THEN
   !!!$acc end data
   ! needs whole size CALL FTDIR(2*KF_FS)
 ENDIF
-!!!!!$acc update host(ZGTF)
 
 ! Save Fourier data in FOUBUF_IN
 
@@ -197,6 +210,7 @@ ENDIF
 !!$OMP END PARALLEL DO
 CALL GSTATS(1640,1)
 CALL GSTATS(106,1)
+
 IF (LHOOK) CALL DR_HOOK('EFTDIR_CTL_MOD:EFTDIR_CTL',1,ZHOOK_HANDLE)
 
 !     ------------------------------------------------------------------
