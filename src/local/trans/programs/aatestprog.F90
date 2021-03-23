@@ -51,6 +51,7 @@ LOGICAL :: LLHOOK
 #include "trans_inq.h"
 #include "dist_grid.h"
 #include "gath_grid.h"
+#include "gath_spec.h"
 #include "dir_trans.h"
 #include "inv_trans.h"
 
@@ -58,6 +59,7 @@ LOGICAL :: LLHOOK
 #include "etrans_inq.h"
 #include "edist_grid.h"
 #include "egath_grid.h"
+#include "egath_spec.h"
 #include "edir_trans.h"
 #include "einv_trans.h"
 
@@ -171,7 +173,7 @@ ELSE
   NPROC  = MPL_NPROC ()
 ENDIF
 
-CALL SQUARE (NPROC, IA, IB)
+CALL SQUARE (NPROC, IB, IA)
 
 IF (NPRGPNS == 0 .AND. NPRGPEW == 0) THEN
   NPRGPNS = IA
@@ -236,6 +238,8 @@ ENDDO
 
 IFLDSPL = COUNT (IVSET == MYSETV)
 
+PRINT *, " IFLDSPL = ", IFLDSPL, " MYPROC = ", MYPROC
+
 ALLOCATE (ZSPBUFL (IFLDSPL, NSPEC2))
 ALLOCATE (ZGPBUFL (NGPTOT, IFLDGPG, 1))
 
@@ -252,23 +256,43 @@ DO ITIME = 1, NTIME
 
   IF (LELAM) THEN
     CALL EDIR_TRANS (PSPSCALAR=ZSPBUFL, PGP=ZGPBUFL, KVSETSC=IVSET)
+
+BLOCK
+  INTEGER :: JJ, JFLD
+  REAL (KIND=JPRB) :: ZSPBUFG (IFLDGPG, NSPEC2G)
+  INTEGER (KIND=JPIM) :: ITO (IFLDGPG)
+
+  ITO = 1
+
+  IF (MYPROC == 1) THEN
+    CALL EGATH_SPEC (PSPECG=ZSPBUFG, KFGATHG=IFLDGPG, KTO=ITO, KVSET=IVSET, PSPEC=ZSPBUFL)
+  ELSE
+    CALL EGATH_SPEC (KFGATHG=IFLDGPG, KTO=ITO, KVSET=IVSET, PSPEC=ZSPBUFL)
+  ENDIF
+
+  IF (MYPROC == 1) THEN
+    WHERE (ABS (ZSPBUFG) < 1E-15)
+      ZSPBUFG = 0._JPRB
+    ELSEWHERE
+      ZSPBUFG = ZSPBUFG
+    ENDWHERE
+
+    DO JFLD = 1, IFLDGPG
+      WRITE (*, *) " JFLD = ", JFLD
+      DO JJ = 1, NSPEC2G
+        WRITE (*, *) JJ, ZSPBUFG (JFLD, JJ)
+      ENDDO
+    ENDDO
+  ENDIF
+ENDBLOCK
+
     GOTO 999
 #ifdef LAM
     CALL EINV_TRANS (PSPSCALAR=ZSPBUFL, PGP=ZGPBUFL, KVSETSC=IVSET)
 #endif
   ELSE
-ZSPBUFL = 999.
     CALL DIR_TRANS (PSPSCALAR=ZSPBUFL, PGP=ZGPBUFL, KVSETSC=IVSET)
-
-WRITE (88, *) __FILE__, ':', __LINE__ 
-WRITE (88, *) ZSPBUFL
-
-ZGPBUFL = 999.
     CALL INV_TRANS (PSPSCALAR=ZSPBUFL, PGP=ZGPBUFL, KVSETSC=IVSET)
-
-WRITE (88, *) __FILE__, ':', __LINE__ 
-WRITE (88, *) ZGPBUFL
-
   ENDIF
 
   IF(MYPROC == 1) THEN

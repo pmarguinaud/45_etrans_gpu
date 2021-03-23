@@ -1,6 +1,6 @@
 MODULE EUPDSPB_MOD
 CONTAINS
-SUBROUTINE EUPDSPB(KM,KFIELD,POA,PSPEC,KFLDPTR)
+SUBROUTINE EUPDSPB(KFIELD,POA,PSPEC,KFLDPTR)
 
 !**** *EUPDSPB* - Update spectral arrays after direct Legendre transform
 
@@ -13,7 +13,7 @@ SUBROUTINE EUPDSPB(KM,KFIELD,POA,PSPEC,KFLDPTR)
 !     ----------
 !        CALL EUPDSPB(....)
 
-!        Explicit arguments :  KM - zonal wavenumber
+!        Explicit arguments :  
 !        --------------------  KFIELD  - number of fields
 !                              POA - work array
 !                              PSPEC - spectral array
@@ -52,16 +52,17 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 !USE TPM_FIELDS
 !USE TPM_DISTR
 USE TPMALD_DISTR    ,ONLY : DALD
+USE TPM_DISTR       ,ONLY : D
 !
 
 IMPLICIT NONE
 
-INTEGER(KIND=JPIM),INTENT(IN)  :: KM,KFIELD
-REAL(KIND=JPRB)   ,INTENT(IN)  :: POA(:,:)
+INTEGER(KIND=JPIM),INTENT(IN)  :: KFIELD
+REAL(KIND=JPRB)   ,INTENT(IN)  :: POA(:,:,:)
 REAL(KIND=JPRB)   ,INTENT(OUT) :: PSPEC(:,:)
 INTEGER(KIND=JPIM),INTENT(IN),OPTIONAL :: KFLDPTR(:)
 
-INTEGER(KIND=JPIM) :: II, INM, IR, JFLD, JN,IFLD
+INTEGER(KIND=JPIM) :: II, INM, IR, JFLD, JN,IFLD, JM, IM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !     ------------------------------------------------------------------
@@ -69,36 +70,29 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.    UPDATE SPECTRAL FIELDS.
 !              -----------------------
 IF (LHOOK) CALL DR_HOOK('EUPDSPB_MOD:EUPDSPB',0,ZHOOK_HANDLE)
+
 IF(PRESENT(KFLDPTR)) THEN
-  DO JN=1,DALD%NCPL2M(KM),2
-    INM=DALD%NESM0(KM)+(JN-1)*2
-    DO JFLD=1,KFIELD
-      IR= 2*JFLD-1
-      II=IR+1
-      IFLD = KFLDPTR(JFLD)
-      PSPEC(IFLD,INM)    =POA(JN,IR)
-      PSPEC(IFLD,INM+1)  =POA(JN+1,IR)
-      PSPEC(IFLD,INM+2)  =POA(JN,II)
-      PSPEC(IFLD,INM+3)  =POA(JN+1,II)
-    ENDDO
-  ENDDO
-ELSE
-  DO JN=1,DALD%NCPL2M(KM),2
-    INM=DALD%NESM0(KM)+(JN-1)*2
-! use unroll to provoke vectorization of outer loop
-!cdir unroll=4
-!DIR$ IVDEP
-!OCL NOVREC
-    DO JFLD=1,KFIELD
-      IR= 2*JFLD-1
-      II=IR+1
-      PSPEC(JFLD,INM)    =POA(JN,IR)
-      PSPEC(JFLD,INM+1)  =POA(JN+1,IR)
-      PSPEC(JFLD,INM+2)  =POA(JN,II)
-      PSPEC(JFLD,INM+3)  =POA(JN+1,II)
-    ENDDO
-  ENDDO
+   CALL ABOR1 ('Error: code path not (yet) supported in GPU version')
 ENDIF
+  
+
+DO JM = 1, D%NUMP
+  IM = D%MYMS(JM)
+
+  DO JN=1,DALD%NCPL2M(IM),2
+    INM=DALD%NESM0(IM)+(JN-1)*2
+    DO JFLD=1,KFIELD
+      IR= 2*JFLD-1
+      II=IR+1
+      PSPEC(JFLD,INM)    =POA(JN,IR,JM)
+      PSPEC(JFLD,INM+1)  =POA(JN+1,IR,JM)
+      PSPEC(JFLD,INM+2)  =POA(JN,II,JM)
+      PSPEC(JFLD,INM+3)  =POA(JN+1,II,JM)
+    ENDDO
+  ENDDO
+
+ENDDO
+
 IF (LHOOK) CALL DR_HOOK('EUPDSPB_MOD:EUPDSPB',1,ZHOOK_HANDLE)
 
 END SUBROUTINE EUPDSPB
