@@ -61,7 +61,8 @@ static int planWorkspaceSize=100*1024*1024; //100MB
  
 extern "C"
 void
-create_plan_fftc_(cufftHandle *PLANp, int *ISIGNp, int *Np, int *LOTp, int *STRIDEp, int *DISTp)
+//create_plan_fftc_(cufftHandle *PLANp, int *ISIGNp, int *Np, int *LOTp, int *STRIDEp, int *DISTp)
+create_plan_fftc_(cufftHandle *PLANp, int *Np, int *ISTRIDEp, int *IDISTp, int *OSTRIDEp, int *ODISTp, int *ISIGNp, int *LOTp)
 {
 int ISIGN = *ISIGNp;
 int N = *Np;
@@ -69,10 +70,11 @@ int LOT = *LOTp;
 
 cufftHandle plan;
 
-if (cudaDeviceSynchronize() != cudaSuccess){
-	fprintf(stderr, "Cuda error: Failed to synchronize\n");
-	return;	
-}
+if (cudaDeviceSynchronize() != cudaSuccess)
+  {
+    fprintf(stderr, "Cuda error: Failed to synchronize\n");
+    return;	
+  }
 
 
 // //create a single re-usable workspace
@@ -86,8 +88,8 @@ if (cudaDeviceSynchronize() != cudaSuccess){
 //  cufftSetAutoAllocation(plan, false);
 
 int embed[1];
-int stride;
-int dist;
+int istride, ostride;
+int idist, odist;
 
 #ifdef TRANS_SINGLE
 cufftType cufft_1 = CUFFT_R2C;
@@ -98,34 +100,38 @@ cufftType cufft_2 = CUFFT_Z2D;
 #endif
 
 embed[0] = 1;
-stride   = *STRIDEp;
-dist     = *DISTp;
+istride   = *ISTRIDEp;
+idist     = *IDISTp;
+ostride   = *OSTRIDEp;
+odist     = *ODISTp;
 
 
 cufftSafeCall(cufftCreate(&plan));
 
-if(1){
+if(0){
   printf("CreatePlan cuFFT\n","N=",N);
   printf("%s %d \n","plan=",plan);
   printf("%s %d \n","LOT=",LOT);
   printf("%s %d \n","ISIGN=",ISIGN);
   printf("%s %d \n","Np=",*Np);
-  printf("%s %d \n","STRIDEp=",*STRIDEp);
-  printf("%s %d \n","DISTp=",*DISTp);
+  printf("%s %d \n","ISTRIDEp=",*ISTRIDEp);
+  printf("%s %d \n","IDISTp=",*IDISTp);
+  printf("%s %d \n","OSTRIDEp=",*OSTRIDEp);
+  printf("%s %d \n","ODISTp=",*ODISTp);
   fflush (stdout);
 }
 
 if( ISIGN== -1 ){
   cufftSafeCall(cufftPlanMany(&plan, 1, &N,
-                 embed, stride, dist, 
-                 embed, stride, dist, 
+                 embed, istride, idist, 
+                 embed, ostride, odist, 
                  cufft_1, LOT));
   //cufftSafeCall(cufftPlan1d(&plan, N, CUFFT_D2Z, LOT));
 }
 else if( ISIGN== 1){
   cufftSafeCall(cufftPlanMany(&plan, 1, &N,
-                 embed, stride, dist, 
-                 embed, stride, dist, 
+                 embed, istride, idist, 
+                 embed, istride, idist, 
                  cufft_2, LOT));
   //cufftSafeCall(cufftPlan1d(&plan, N, CUFFT_Z2D, LOT));
 }
