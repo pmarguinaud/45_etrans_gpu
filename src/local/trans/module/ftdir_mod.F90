@@ -69,6 +69,7 @@ integer :: istat
 
 !     ------------------------------------------------------------------
 
+#ifdef UNDEF
 BLOCK
   INTEGER :: ISTR, JFLD, JGL
   IF (MODULO (D%NLENGTF, D%NDGL_FS)) & 
@@ -81,6 +82,7 @@ BLOCK
   ENDDO
   ENDDO
 ENDBLOCK
+#endif
 
 IF(MYPROC > NPROC/2)THEN
   IBEG=1
@@ -132,7 +134,7 @@ DO KGL=IBEG,IEND,IINC
     !IRLEN=G_NLOEN(IGLG)+R_NNOEXTZL
     !ICLEN=(IRLEN/2+1)*2
 
-    CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,G_NLOEN(IGLG),KFIELDS)
+    CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,G_NLOEN(IGLG),KFIELDS,KFIELDS,1)
     !$ACC host_data use_device(ZGTF)
     CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,ZGTF(1, IOFF))
     !$ACC end host_data
@@ -140,6 +142,7 @@ DO KGL=IBEG,IEND,IINC
    !ENDIF
 END DO
 
+#ifdef UNDEF
 !$acc update host (ZGTF)
 BLOCK
   INTEGER :: ISTR, JFLD, JGL
@@ -162,6 +165,7 @@ BLOCK
   ENDDO
   CALL FLUSH (88)
 ENDBLOCK
+#endif
 
 istat = cuda_Synchronize()
 
@@ -224,6 +228,7 @@ END DO
 
 !$ACC end data
 
+#ifdef UNDEF
 !$acc update host (ZGTF)
 BLOCK
   INTEGER :: ISTR, JFLD, JGL
@@ -246,6 +251,7 @@ BLOCK
   ENDDO
   CALL FLUSH (88)
 ENDBLOCK
+#endif
 
 !     ------------------------------------------------------------------
 

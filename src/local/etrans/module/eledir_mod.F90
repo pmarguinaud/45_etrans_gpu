@@ -1,6 +1,6 @@
 MODULE ELEDIR_MOD
 CONTAINS
-SUBROUTINE ELEDIR(KM,KFC,KLED2,PFFT)
+SUBROUTINE ELEDIR(KFC,KLED2,PFFA)
 
 !**** *ELEDIR* - Direct meridional transform.
 
@@ -54,6 +54,7 @@ SUBROUTINE ELEDIR(KM,KFC,KLED2,PFFT)
 USE PARKIND1  ,ONLY : JPIM, JPRB
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
+USE TPM_DISTR       ,ONLY : D
 USE TPM_DIM         ,ONLY : R
 !USE TPM_GEOMETRY
 !USE TPM_TRANS
@@ -63,20 +64,75 @@ USE TPM_FFTW     ,ONLY : TW, EXEC_EFFTW
 #endif
 USE TPMALD_DIM      ,ONLY : RALD
 USE ABORT_TRANS_MOD ,ONLY : ABORT_TRANS
+USE TPM_FFTC        ,ONLY : CREATE_PLAN_FFT
 !
 
 IMPLICIT NONE
 
-INTEGER(KIND=JPIM), INTENT(IN)  :: KM,KFC,KLED2
-REAL(KIND=JPRB) ,   INTENT(INOUT)  :: PFFT(:,:)
+INTEGER(KIND=JPIM), INTENT(IN)  :: KFC,KLED2
+REAL(KIND=JPRB) ,   INTENT(INOUT)  :: PFFA(:,:,:)
 
 INTEGER(KIND=JPIM) :: IRLEN, ICLEN, IOFF, ITYPE
+INTEGER(KIND=JPIM) :: IPLAN_R2C
 LOGICAL :: LL_ALL=.FALSE. ! T=do kfields ffts in one batch, F=do kfields ffts one at a time
 !     ------------------------------------------------------------------
 
 !*       1.       PERFORM FOURIER TRANFORM.
 !                 --------------------------
 
+IRLEN=R%NDGL+R%NNOEXTZG
+ICLEN=RALD%NDGLSUR+R%NNOEXTZG
+
+PRINT *, " KFC   = ", KFC
+PRINT *, " IRLEN = ", IRLEN
+PRINT *, " ICLEN = ", ICLEN
+PRINT *, " UBOUND (PFFA) = ", UBOUND (PFFA)
+
+BLOCK
+INTEGER :: KMLOC, JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__ 
+!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
+PFFA = 0.
+DO JJ = 1, IRLEN
+  PFFA (JJ, 1, 1) = 1._JPRB
+ENDDO
+DO JJ = 1, IRLEN
+  PFFA (JJ, 2, 1) = 1._JPRB
+ENDDO
+PFFA (:, :, :) = 999999.
+PFFA (:, 1, :) = 1.
+PFFA (:, 2, :) = 0.
+DO KMLOC = 1, D%NUMP
+  DO JJ = 1, ICLEN
+    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
+  ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
+
+
+!CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,IRLEN,KFC*D%NUMP,1,ICLEN)
+CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,IRLEN,UBOUND (PFFA,2)*D%NUMP,1,ICLEN)
+
+!$acc host_data use_device (PFFA)
+CALL EXECUTE_PLAN_FFTC(IPLAN_R2C, -1, PFFA)
+!$acc end host_data
+
+BLOCK
+INTEGER :: KMLOC, JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__ 
+!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
+DO KMLOC = 1, D%NUMP
+  DO JJ = 1, ICLEN
+    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
+  ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
+
+CALL ABOR1 ('ELEDIR')
+
+#ifdef UNDEF
 IF (KFC>0) THEN
   ITYPE=-1
   IRLEN=R%NDGL+R%NNOEXTZG
@@ -92,6 +148,7 @@ IF (KFC>0) THEN
     CALL ABORT_TRANS('ELEDIR_MOD:ELEDIR: NO FFT PACKAGE SELECTED')
   ENDIF
 ENDIF
+#endif
 
 !     ------------------------------------------------------------------
 
