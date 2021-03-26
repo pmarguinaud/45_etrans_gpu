@@ -199,8 +199,8 @@ CALL ELEINV(IFC,KF_OUT_LT,ZFFA)
 !*       5.    RECOMBINATION SYMMETRIC/ANTISYMMETRIC PART.
 !              --------------------------------------------
 
-CALL ABOR1 ('')
-!CALL EASRE1B(KF_OUT_LT,KM,KMLOC,ZIA(:,ISTA:ISTA+IFC-1))
+CALL EASRE1B(KF_OUT_LT,ZFFA(:,ISTA:ISTA+IFC-1,:))
+
 !     ------------------------------------------------------------------
 
 !     6. OPTIONAL COMPUTATIONS IN FOURIER SPACE

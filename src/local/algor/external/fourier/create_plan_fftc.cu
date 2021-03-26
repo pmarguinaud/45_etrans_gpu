@@ -19,22 +19,17 @@ static const char *_cudaGetErrorEnum(cufftResult error)
       cr (UNALIGNED_DATA);
 #undef cr
     }
-  return "<unknown>";
+  return "UNKNOWN";
 }
 
 inline void __cufftSafeCall(cufftResult err, const char *file, const int line)
 {
-  if( CUFFT_SUCCESS != err) {
-  fprintf(stderr, "CUFFT error at 1\n");
-  fprintf(stderr, "CUFFT error in file '%s'\n",__FILE__);
-  fprintf(stderr, "CUFFT error at 2\n");
-  /*fprintf(stderr, "CUFFT error line '%s'\n",__LINE__);*/
-  fprintf(stderr, "CUFFT error at 3\n");
-  /*fprintf(stderr, "CUFFT error in file '%s', line %d\n %s\nerror %d: %s\nterminating!\n",__FILE__, __LINE__,err, \
-  _cudaGetErrorEnum(err)); \*/
-  fprintf(stderr, "CUFFT error %d: %s\nterminating!\n",err,_cudaGetErrorEnum(err)); \
-  cudaDeviceReset(); return; \
-  }
+  if (CUFFT_SUCCESS != err) 
+    {
+      fprintf(stderr, "CUFFT at '%s:%d'\n", file, line);
+      fprintf(stderr, "CUFFT error %d: %s\nterminating!\n", err, _cudaGetErrorEnum (err)); 
+      cudaDeviceReset(); 
+   }
 }
 
 
@@ -91,7 +86,7 @@ create_plan_fftc_(cufftHandle *PLANp, int *Np, int *ISTRIDEp, int *IDISTp, int *
   
   cufftSafeCall (cufftCreate (&plan));
   
-  if(1){
+  if(0){
     printf("CreatePlan cuFFT\n","N=",N);
     printf("%s %d \n","plan=",plan);
     printf("%s %d \n","LOT=",LOT);
