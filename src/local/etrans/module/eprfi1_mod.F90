@@ -75,6 +75,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.    EXTRACT FIELDS FROM SPECTRAL ARRAYS.
 !              ------------------------------------
 
+#ifdef UNDEF
+
 IF (LHOOK) CALL DR_HOOK('EPRFI1_MOD:EPRFI1',0,ZHOOK_HANDLE)
 IFIRST = 1
 ILAST  = 4*KF_UV
@@ -97,6 +99,8 @@ IF(KF_SCALARS > 0)THEN
   CALL EPRFI1B(KM,PIA(:,IFIRST:ILAST),PSPSCALAR(:,:),KF_SCALARS,KFLDPTRSC)
 ENDIF
 IF (LHOOK) CALL DR_HOOK('EPRFI1_MOD:EPRFI1',1,ZHOOK_HANDLE)
+
+#endif
 
 !     ------------------------------------------------------------------
 
