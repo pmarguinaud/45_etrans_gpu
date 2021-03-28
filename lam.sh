@@ -13,7 +13,14 @@ mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTP
 
 rm -f snapshot_*.png
 
-~/3d/glgrib/glgrib.sh --field[0].path AATESTPROG.fa%ZZZFFFFF --field[0].palette.name cold_hot --scene.center.on --colorbar.on 
-mv snapshot_0000.png ~/tmp/.
-ssh ecgate scp ~/tmp/snapshot_0000.png phi001@90.76.140.145:tmp/snapshot_0000.png
+for i in 1 2
+do
+~/3d/glgrib/glgrib.sh --field[0].path AATESTPROG.fa%SURFFFFF.000$i --field[0].palette.name cold_hot --scene.center.on --colorbar.on 
+done
+
+for i in 0 1
+do
+mv snapshot_000$i.png ~/tmp/.
+ssh ecgate scp ~/tmp/snapshot_000$i.png phi001@90.76.140.145:tmp/snapshot_000$i.png
+done
 
