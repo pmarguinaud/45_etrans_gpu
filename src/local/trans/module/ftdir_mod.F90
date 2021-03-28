@@ -69,21 +69,6 @@ integer :: istat
 
 !     ------------------------------------------------------------------
 
-#ifdef UNDEF
-BLOCK
-  INTEGER :: ISTR, JFLD, JGL
-  IF (MODULO (D%NLENGTF, D%NDGL_FS)) & 
-    & CALL ABOR1 ('D%NLENGTF IS NOT A MULTIPLE OF D%NDGL_FS')
-  ISTR = D%NLENGTF / D%NDGL_FS
-  DO JFLD = 1, 1
-  WRITE (88, *) " JFLD = ", JFLD
-  DO JGL = 1, D%NDGL_FS
-    WRITE (88, '(100E12.4)') ZGTF (JFLD,1+(JGL-1)*ISTR:JGL*ISTR)
-  ENDDO
-  ENDDO
-ENDBLOCK
-#endif
-
 IF(MYPROC > NPROC/2)THEN
   IBEG=1
   IEND=D%NDGL_FS
@@ -141,31 +126,6 @@ DO KGL=IBEG,IEND,IINC
 
    !ENDIF
 END DO
-
-#ifdef UNDEF
-!$acc update host (ZGTF)
-BLOCK
-  INTEGER :: ISTR, JFLD, JGL
-  REAL (KIND=JPRBT) :: ZZGTF (UBOUND (ZGTF, 1), UBOUND (ZGTF, 2))
-! REAL (KIND=JPRBT) :: ZZGTF (1,D%NLENGTF)
-  WHERE (ABS (ZGTF) < 1E-15) 
-    ZZGTF = 0._JPRB
-  ELSEWHERE
-    ZZGTF = ZGTF
-  ENDWHERE
-  WRITE (88, *) __FILE__, ':', __LINE__ 
-  WRITE (88, *) "-------------"
-  WRITE (88, *) " KFIELDS = ", KFIELDS
-  ISTR = D%NLENGTF / D%NDGL_FS
-  DO JFLD = 1, 1
-  WRITE (88, *) " JFLD = ", JFLD
-  DO JGL = 1, D%NDGL_FS
-    WRITE (88, '(100E12.4)') ZZGTF (JFLD,1+(JGL-1)*ISTR:JGL*ISTR)
-  ENDDO
-  ENDDO
-  CALL FLUSH (88)
-ENDBLOCK
-#endif
 
 istat = cuda_Synchronize()
 
@@ -227,31 +187,6 @@ DO KGL=IBEG,IEND,IINC
 END DO
 
 !$ACC end data
-
-#ifdef UNDEF
-!$acc update host (ZGTF)
-BLOCK
-  INTEGER :: ISTR, JFLD, JGL
-  REAL (KIND=JPRBT) :: ZZGTF (UBOUND (ZGTF, 1), UBOUND (ZGTF, 2))
-! REAL (KIND=JPRBT) :: ZZGTF (1,D%NLENGTF)
-  WHERE (ABS (ZGTF) < 1E-15) 
-    ZZGTF = 0._JPRB
-  ELSEWHERE
-    ZZGTF = ZGTF
-  ENDWHERE
-  WRITE (88, *) __FILE__, ':', __LINE__ 
-  WRITE (88, *) "-------------"
-  WRITE (88, *) " KFIELDS = ", KFIELDS
-  ISTR = D%NLENGTF / D%NDGL_FS
-  DO JFLD = 1, 1
-  WRITE (88, *) " JFLD = ", JFLD
-  DO JGL = 1, D%NDGL_FS
-    WRITE (88, '(100E12.4)') ZZGTF (JFLD,1+(JGL-1)*ISTR:JGL*ISTR)
-  ENDDO
-  ENDDO
-  CALL FLUSH (88)
-ENDBLOCK
-#endif
 
 !     ------------------------------------------------------------------
 

@@ -118,46 +118,15 @@ IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',0,ZHOOK_HANDLE)
 !*     1.    PREPARE WORK ARRAYS.
 !            --------------------
 
-  IFC = 2 * KF_FS
+IFC = 2 * KF_FS
 
-  CALL EPRFI2(KF_FS,ZFFA)
-
-#ifdef UNDEF
-WRITE (0, *) __FILE__, ':', __LINE__ 
-!$acc serial present (ZFFA) copyin (D_NUMP,R_NDGL)
-DO KMLOC = 1, D_NUMP
-  DO JGL=1,R_NDGL
-    DO JF =1,1
-      IJR = 2*(JF-1)+1
-      IJI = IJR+1
-      PRINT *, KMLOC, JGL, JF, ZFFA(JGL,IJR,KMLOC), ZFFA(JGL,IJI,KMLOC)
-    ENDDO
-  ENDDO
-ENDDO
-!$acc end serial
-
-
-!$acc update host (ZFFA)
-
-BLOCK
-  INTEGER :: JMLOC, JGL
-  WRITE (88, *) __FILE__, ':', __LINE__, " D%NUMP = ", D%NUMP
-  DO JMLOC = 1, D%NUMP
-  DO JGL = 1, R%NDGL
-    WRITE (88, '(2I5,2E12.4)') JMLOC, JGL, ZFFA (JGL, 1, JMLOC), ZFFA (JGL, 2, JMLOC)
-  ENDDO
-  ENDDO
-  CALL FLUSH (88)
-ENDBLOCK
-
-#endif
-
+CALL EPRFI2(KF_FS,ZFFA)
 
 !*     2.    PERIODICIZATION IN Y DIRECTION
 !            ------------------------------
 
-  IF(R%NNOEXTZG>0) THEN
-    CALL ABOR1 ('BROKEN R%NNOEXTZG>0')
+IF(R%NNOEXTZG>0) THEN
+  CALL ABOR1 ('BROKEN R%NNOEXTZG>0')
 !   DO JF = 1,IFC
 !     DO JDIM = 1,R%NDGL
 !       ZFFT2(JF,JDIM)=ZFFT(JDIM,JF,JM)
@@ -170,7 +139,7 @@ ENDBLOCK
 !       ZFFT(JDIM,JF,JM) = ZFFT2(JF,JDIM)
 !     ENDDO
 !   ENDDO
-  ENDIF
+ENDIF
 
 
 !*     3.    DIRECT LEGENDRE TRANSFORM.

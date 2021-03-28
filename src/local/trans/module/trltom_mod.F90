@@ -164,22 +164,6 @@ MODULE TRLTOM_MOD
     ILEN = D%NLTSGTB(MYSETW)*KFIELD
     ISTA = D%NSTAGT1B(MYSETW)*KFIELD+1
 
-#ifdef UNDEF
-WRITE (*, *) __FILE__, ':', __LINE__ 
-PRINT *, " ISTA = ", ISTA, " ILEN = ", ILEN
-!$acc parallel copyin (ISTA, ILEN) num_gangs(1) num_workers(1) vector_length(1) present(PFBUF_IN)
-PRINT *, " ISTA = ", ISTA, " ILEN = ", ILEN
-DO J = ISTA, ISTA+ILEN-1
-IF (ABS (PFBUF_IN (J)) < 1E-15) THEN
-PRINT *, J, 0._8
-ELSE
-PRINT *, J, PFBUF_IN (J)
-ENDIF
-ENDDO
-!$acc end parallel
-#endif
-
-
     CALL GSTATS(1607,0)
     !$ACC data present(PFBUF_IN,PFBUF)
     !$ACC parallel loop
@@ -187,19 +171,6 @@ ENDDO
       PFBUF(J) = PFBUF_IN(J)
     ENDDO
     !$ACC end data
-
-#ifdef UNDEF
-WRITE (*, *) __FILE__, ':', __LINE__ 
-!$acc parallel copyin (ISTA, ILEN) num_gangs(1) num_workers(1) vector_length(1) present(PFBUF)
-DO J = ISTA, ISTA+ILEN-1
-IF (ABS (PFBUF (J)) < 1E-15) THEN
-PRINT *, J, 0._8
-ELSE
-PRINT *, J, PFBUF (J)
-ENDIF
-ENDDO
-!$acc end parallel
-#endif
 
     CALL GSTATS(1607,1)
   ENDIF

@@ -76,41 +76,10 @@ IF (LHOOK) CALL DR_HOOK('EPRFI2B_MOD:EPRFI2B',0,ZHOOK_HANDLE)
 !*       1.    EXTRACT SYM./ANTISYM. FIELDS FROM FOURIER ARRAY.
 !              ------------------------------------------------
 
-#ifdef UNDEF
-WRITE (0, *) __FILE__, ':', __LINE__
-
-N = SIZE (FOUBUF)
-
-!$acc parallel num_gangs(1) num_workers(1) vector_length(1) present (FOUBUF) copyin (N)
-DO J = 1, N
-  PRINT *, J, FOUBUF (J)
-ENDDO
-!$acc end parallel
-
-WRITE (0, *) __FILE__, ':', __LINE__
-!$acc parallel num_gangs(1) num_workers(1) vector_length(1) present (FOUBUF) COPY(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
-PRINT *, "KMLOC", "JGL", "JF", "FOUBUF(ISTAN+IJR)", "FOUBUF(ISTAN+IJI)"
-DO KMLOC = 1, D_NUMP
-  DO JGL=1,R_NDGL
-    DO JF =1,KFIELD
-      KM = D_MYMS(KMLOC)
-      IJR = 2*(JF-1)+1
-      IJI = IJR+1
-      ISTAN = (D_NSTAGT1B(D_NPROCL(JGL) )+D_NPNTGTB1(KMLOC,JGL ))*2*KFIELD
-      PRINT *, KMLOC, JGL, JF, FOUBUF(ISTAN+IJR), FOUBUF(ISTAN+IJI)
-!     PFFA(JGL,IJR,KMLOC) = FOUBUF(ISTAN+IJR)
-!     PFFA(JGL,IJI,KMLOC) = FOUBUF(ISTAN+IJI)
-    ENDDO
-  ENDDO
-ENDDO
-!$acc end parallel
-
-#endif
-
-!$ACC data &
-!$ACC& present(PFFA) &
-!$ACC& present(FOUBUF) &
-!$ACC& COPY(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
+!$acc data &
+!$acc& present(PFFA) &
+!$acc& present(FOUBUF) &
+!$acc& COPY(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
   
 !loop over wavenumber
 !$ACC parallel loop collapse(3) private(ISTAN,KM,IJR,IJI)
@@ -127,24 +96,7 @@ DO KMLOC = 1, D_NUMP
   ENDDO
 ENDDO
 
-!$ACC end data
-
-
-#ifdef UNDEF
-WRITE (0, *) __FILE__, ':', __LINE__
-!$acc parallel num_gangs(1) num_workers(1) vector_length(1) present (PFFA) COPY(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
-DO KMLOC = 1, D_NUMP
-  DO JGL=1,R_NDGL
-    DO JF =1,KFIELD
-      IJR = 2*(JF-1)+1
-      IJI = IJR+1
-      PRINT *, KMLOC, JGL, JF, PFFA(JGL,IJR,KMLOC), PFFA(JGL,IJI,KMLOC)
-    ENDDO
-  ENDDO
-ENDDO
-!$acc end parallel
-#endif
-
+!$acc end data
 
 IF (LHOOK) CALL DR_HOOK('EPRFI2B_MOD:EPRFI2B',1,ZHOOK_HANDLE)
 

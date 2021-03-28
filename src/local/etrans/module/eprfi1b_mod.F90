@@ -7,7 +7,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
 !USE TPM_DIM
 USE TPM_DISTR
-USE TPMALD_DISTR    ,ONLY : DALD, DALD_NESM0, DALD_NCPL2M
+USE TPMALD_DISTR    ,ONLY : DALD
 !
 !**** *PRFI1* - Prepare spectral fields for inverse Legendre transform
 
@@ -108,35 +108,6 @@ DO KMLOC = 1, D%NUMP
   ENDIF
 
 ENDDO
-
-#ifdef UNDEF
-!$acc update device (PFFA)
-
-WRITE (*, *) __FILE__, ':', __LINE__ 
-
-!$acc serial present (PFFA) present (D_NUMP, DALD_NCPL2M, DALD_NESM0, D_MYMS) 
-DO KMLOC = 1, D_NUMP
-
-  KM   = D_MYMS(KMLOC)
-  ILCM = DALD_NCPL2M(KM)
-  IOFF = DALD_NESM0(KM)
-
-print *, KMLOC, ILCM, IOFF, KM
-
-    DO J=1,ILCM,2
-      INM = IOFF+(J-1)*2
-      DO JFLD=1,KFIELDS
-        IR = 2*(JFLD-1)+1
-        II = IR+1
-PRINT *, J, IR, II, KMLOC, PFFA(J  ,IR,KMLOC), PFFA(J+1,IR,KMLOC), PFFA(J  ,II,KMLOC), PFFA(J+1,II,KMLOC)
-      ENDDO
-    ENDDO
-  
-ENDDO
-!$acc end serial
-
-#endif
-
 
 IF (LHOOK) CALL DR_HOOK('EPRFI1B_MOD:EPRFI1B',1,ZHOOK_HANDLE)
 

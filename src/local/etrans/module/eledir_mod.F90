@@ -66,43 +66,6 @@ REAL (KIND=JPRB)   :: ZSCAL
 IRLEN=R%NDGL+R%NNOEXTZG
 ICLEN=RALD%NDGLSUR+R%NNOEXTZG
 
-#ifdef UNDEF
-
-PRINT *, " KFC   = ", KFC
-PRINT *, " IRLEN = ", IRLEN
-PRINT *, " ICLEN = ", ICLEN
-PRINT *, " UBOUND (PFFA) = ", UBOUND (PFFA)
-
-BLOCK
-INTEGER :: KMLOC, JF, JJ
-!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
-PFFA = 0.
-PFFA (:, :, :) = 999999.
-DO JJ = 1, IRLEN
-  PFFA (JJ, 1::2, :) = 1._JPRB
-ENDDO
-DO JJ = 1, IRLEN
-  PFFA (JJ, 2::2, :) = 2 * MODULO (JJ, 2) - 1
-ENDDO
-!$acc end serial
-ENDBLOCK
-
-#endif
-
-#ifdef UNDEF
-BLOCK
-INTEGER :: KMLOC, JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__ 
-!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
-DO KMLOC = 1, D%NUMP
-  DO JJ = 1, ICLEN
-    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
-  ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
-#endif
-
 CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=UBOUND (PFFA,2)*D%NUMP, &
                     & KISTRIDE=1, KIDIST=ICLEN, KOSTRIDE=1, KODIST=ICLEN/2)
 
@@ -121,20 +84,6 @@ DO KMLOC = 1, D_NUMP
   ENDDO
 ENDDO
 !$acc end parallel loop
-
-#ifdef UNDEF
-BLOCK
-INTEGER :: KMLOC, JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__ 
-!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
-DO KMLOC = 1, D%NUMP
-  DO JJ = 1, ICLEN
-    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
-  ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
-#endif
 
 !     ------------------------------------------------------------------
 

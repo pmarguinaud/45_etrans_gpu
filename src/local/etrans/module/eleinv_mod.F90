@@ -84,48 +84,12 @@ IF (LHOOK) CALL DR_HOOK('ELEINV_MOD:ELEINV',0,ZHOOK_HANDLE)
 IRLEN=R%NDGL+R%NNOEXTZG
 ICLEN=RALD%NDGLSUR+R%NNOEXTZG
 
-#ifdef UNDEF
-
-BLOCK
-INTEGER :: KMLOC, JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__ 
-WRITE (*, *) " IRLEN = ", IRLEN
-WRITE (*, *) " ICLEN = ", ICLEN
-
-!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
-DO KMLOC = 1, D%NUMP
-  DO JJ = 1, ICLEN
-    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
-  ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
-
-#endif
-
 CALL CREATE_PLAN_FFT (IPLAN_C2R, +1, KN=IRLEN/2, KLOT=UBOUND (PFFA,2)*D%NUMP, &
                     & KISTRIDE=1, KIDIST=ICLEN/2, KOSTRIDE=1, KODIST=ICLEN)
 
 !$acc host_data use_device (PFFA) 
 CALL EXECUTE_PLAN_FFTC(IPLAN_C2R, +1, PFFA (1, 1, 1))
 !$acc end host_data
-
-#ifdef UNDEF
-
-BLOCK
-INTEGER :: KMLOC, JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__ 
-!$acc serial copyin (D%NUMP,IRLEN) present (PFFA)
-DO KMLOC = 1, D%NUMP
-  DO JJ = 1, ICLEN
-    PRINT *, KMLOC, JJ, PFFA (JJ, 1, KMLOC), PFFA (JJ, 2, KMLOC)
-  ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
-
-#endif
-
 
 IF (LHOOK) CALL DR_HOOK('ELEINV_MOD:ELEINV',1,ZHOOK_HANDLE)
 
