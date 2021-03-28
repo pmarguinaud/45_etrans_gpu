@@ -1,6 +1,6 @@
 MODULE EFTDIR_MOD
 CONTAINS
-SUBROUTINE EFTDIR(KFIELDS)
+SUBROUTINE EFTDIR(PREEL, KFIELDS)
 
 
 !**** *FTDIR - Direct Fourier transform
@@ -36,10 +36,9 @@ SUBROUTINE EFTDIR(KFIELDS)
 
 !     ------------------------------------------------------------------
 
-USE PARKIND1  ,ONLY : JPIM, JPIB, JPRBT
+USE PARKIND1  ,ONLY : JPIM, JPIB, JPRBT, JPRB
 
 USE TPM_DISTR       ,ONLY : D, MYSETW, MYPROC, NPROC,D_NSTAGTF,D_NPTRLS
-USE TPM_TRANS       ,ONLY : ZGTF
 USE TPM_GEOMETRY    ,ONLY : G,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX
 USE TPM_FFT         ,ONLY : T, TB
 #ifdef WITH_FFTW
@@ -53,15 +52,14 @@ USE CUDA_DEVICE_MOD
 IMPLICIT NONE
 
 INTEGER(KIND=JPIM),INTENT(IN)  :: KFIELDS
+REAL(KIND=JPRB), INTENT(INOUT) :: PREEL(:,:)
 INTEGER(KIND=JPIM)  :: KGL
-!REAL(KIND=JPRBT), INTENT(INOUT) :: PREEL(:,:)
 
 INTEGER(KIND=JPIM) :: IGLG,IST,ILEN,IJUMP,JJ,JF,IST1
 INTEGER(KIND=JPIM) :: IOFF,IRLEN,ICLEN, ITYPE
 INTEGER(KIND=JPIM) :: IPLAN_R2C
 INTEGER(KIND=JPIM) :: JMAX
-REAL(KIND=JPRBT)    :: SCAL
-LOGICAL :: LL_ALL=.FALSE. ! T=do kfields ffts in one batch, F=do kfields ffts one at a time
+REAL(KIND=JPRBT)   :: SCAL
 
 INTEGER(KIND=JPIM) :: IBEG,IEND,IINC,ISCAL
 INTEGER(KIND=JPIM) :: OFFSET_VAR, IUNIT, ISIZE
@@ -100,20 +98,20 @@ DO KGL=IBEG,IEND,IINC
     !ICLEN=(IRLEN/2+1)*2
 
     CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,KN=G_NLOEN(IGLG),KLOT=KFIELDS)
-    !$ACC host_data use_device(ZGTF)
-    CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,ZGTF(1, IOFF))
-    !$ACC end host_data
+    !$acc host_data use_device(PREEL)
+    CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,PREEL(1, IOFF))
+    !$acc end host_data
 
    !ENDIF
 END DO
 
 istat = cuda_Synchronize()
 
-!$ACC data &
-!$ACC& COPY(D,D_NSTAGTF,D_NPTRLS,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX,R_NNOEXTZL) &
-!$ACC& present(ZGTF)
+!$acc data &
+!$acc& copy(D,D_NSTAGTF,D_NPTRLS,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX,R_NNOEXTZL) &
+!$acc& present(PREEL)
 
-!$ACC parallel loop collapse(3) private(JMAX,KGL,IOFF,SCAL)
+!$acc parallel loop collapse(3) private(JMAX,KGL,IOFF,SCAL)
 DO IGLG=IBEG+OFFSET_VAR-1,IEND+OFFSET_VAR-1,IINC
    DO JJ=1, G_NLOEN_MAX+2
       DO JF=1,KFIELDS
@@ -122,16 +120,13 @@ DO IGLG=IBEG+OFFSET_VAR-1,IEND+OFFSET_VAR-1,IINC
            KGL=IGLG-OFFSET_VAR+1
            IOFF=D_NSTAGTF(KGL)+1
            SCAL = 1._JPRBT/REAL(G_NLOEN(IGLG),JPRBT)
-           ZGTF(JF,IOFF+JJ-1)= SCAL * ZGTF(JF, IOFF+JJ-1)
+           PREEL(JF,IOFF+JJ-1)= SCAL * PREEL(JF, IOFF+JJ-1)
          end if
       ENDDO
    ENDDO
 END DO
 
-! debug
-!iunit=myproc+300
-!!$ACC update host(ZGTF)
-!$ACC parallel loop !collapse(3) private(IGLG,IST,ILEN,IST1)
+!$acc parallel loop 
 DO KGL=IBEG,IEND,IINC
 
    IGLG = D_NPTRLS(MYSETW)+KGL-1
@@ -141,15 +136,15 @@ DO KGL=IBEG,IEND,IINC
    IST1=1
    IF (G_NLOEN(IGLG)==1) IST1=0
 
-   !$ACC loop collapse(2)
+   !$acc loop collapse(2)
    DO JJ=IST1, ILEN
       DO JF=1,KFIELDS
-               ZGTF(JF,IST+D_NSTAGTF(KGL)+JJ-1) = 0.0_JPRBT
+        PREEL(JF,IST+D_NSTAGTF(KGL)+JJ-1) = 0.0_JPRBT
       ENDDO
    ENDDO
 END DO
 
-!$ACC end data
+!$acc end data
 
 !     ------------------------------------------------------------------
 

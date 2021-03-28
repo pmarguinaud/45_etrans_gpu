@@ -114,7 +114,7 @@ ILAST  = 4*KF_UV
 
 ZIA = 0._JPRB
 
-!$acc enter data create (ZIA)
+!$acc enter data create (ZIA) copyin (ZIA)
 
 IF (KF_UV > 0) THEN
 

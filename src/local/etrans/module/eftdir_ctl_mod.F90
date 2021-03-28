@@ -147,17 +147,6 @@ ENDIF
 
 ! Transposition
 
-IF (.FALSE.) THEN
-BLOCK
-  INTEGER (KIND=JPIM) :: JFLD
-  WRITE (88, *) "----------"
-  DO JFLD = 1, SIZE (PGP, 2)
-    WRITE (88, *) PGP (:,JFLD)
-  ENDDO
-  WRITE (88, *) "----------"
-ENDBLOCK
-ENDIF
-
 CALL GSTATS(158,0)
 
 #ifdef USE_CUDA_AWARE_MPI_FT
@@ -184,15 +173,12 @@ ELSE
 ENDIF
 
 
-!#acc update device (ZGTF)
-
 ! Fourier transform
 
 CALL GSTATS(1640,0)
 
-!!$OMP PARALLEL DO SCHEDULE(DYNAMIC,1) PRIVATE(JGL,IGL)
 IF(KF_FS>0) THEN
-  CALL EFTDIR(size(zgtf,1))
+  CALL EFTDIR (ZGTF, KF_FS)
 ENDIF
 
 ! Save Fourier data in FOUBUF_IN
