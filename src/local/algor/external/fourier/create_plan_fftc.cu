@@ -86,7 +86,7 @@ create_plan_fftc_(cufftHandle *PLANp, int *Np, int *ISTRIDEp, int *IDISTp, int *
   
   cufftSafeCall (cufftCreate (&plan));
   
-  if(0){
+  if(1){
     printf("CreatePlan cuFFT\n","N=",N);
     printf("%s %d \n","plan=",plan);
     printf("%s %d \n","LOT=",LOT);

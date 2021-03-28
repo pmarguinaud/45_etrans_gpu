@@ -85,20 +85,6 @@ DO KMLOC = 1, D_NUMP
 ENDDO
 !$acc end parallel loop
 
-WRITE (*, *) __FILE__, ':', __LINE__
-
-!$acc serial present (FOUBUF_IN, D_NSTAGT0B, D_NPNTGTB1, D_NPROCL, D_NUMP, R_NDGL)
-DO KMLOC = 1, D_NUMP
-  DO JGL=1,R_NDGL
-    DO JFLD  =1,2*KFIELD
-      IPROC=D_NPROCL(JGL)
-      IISTAN=(D_NSTAGT0B(IPROC) + D_NPNTGTB1(KMLOC,JGL))*2*KFIELD
-      PRINT *, KMLOC, JGL, JFLD, FOUBUF_IN(IISTAN+JFLD)
-    ENDDO
-  ENDDO
-ENDDO
-!$acc end serial
-
 IF (LHOOK) CALL DR_HOOK('EASRE1B_MOD:EASRE1B',1,ZHOOK_HANDLE)
 !     ------------------------------------------------------------------
 

@@ -141,23 +141,6 @@ IF(KF_SCALARS > 0)THEN
     ILAST  = IFIRST - 1 + 2*KF_SCALARS
     CALL EPRFI1B(ZIA(:,IFIRST:ILAST,:),PSPSCALAR(:,:),KF_SCALARS,KFLDPTRSC)
     !$acc update device (ZIA(:,IFIRST:ILAST,:))
-
-WRITE (*, *) __FILE__, ':', __LINE__ 
-BLOCK
-INTEGER :: II, JJ, KK
-
-!$acc serial present (ZIA)
-DO KK = 1, SIZE (ZIA, 3)
-DO JJ = 1, SIZE (ZIA, 2)
-DO II = 1, SIZE (ZIA, 1)
-  PRINT *, II, JJ, KK, ZIA (II, JJ, KK)
-ENDDO
-ENDDO
-ENDDO
-!$acc end serial
-
-ENDBLOCK
-
   ELSE
     CALL ABOR1 ('')
     IF(PRESENT(PSPSC2) .AND. NF_SC2 > 0) THEN
@@ -213,39 +196,7 @@ IF(KF_UV > 0 .AND. .NOT. LDIVGP) THEN
   ISTA = ISTA+2*KF_UV
 ENDIF
 
-WRITE (*, *) __FILE__, ':', __LINE__ 
-BLOCK
-INTEGER :: II, JJ, KK
-
-!$acc serial present (ZIA)
-DO KK = 1, SIZE (ZIA, 3)
-DO JJ = 1, SIZE (ZIA, 2)
-DO II = 1, SIZE (ZIA, 1)
-  PRINT *, II, JJ, KK, ZIA (II, JJ, KK)
-ENDDO
-ENDDO
-ENDDO
-!$acc end serial
-
-ENDBLOCK
-
 CALL ELEINV(IFC,KF_OUT_LT,ZIA) 
-
-WRITE (*, *) __FILE__, ':', __LINE__ 
-BLOCK
-INTEGER :: II, JJ, KK
-
-!$acc serial present (ZIA)
-DO KK = 1, SIZE (ZIA, 3)
-DO JJ = 1, SIZE (ZIA, 2)
-DO II = 1, SIZE (ZIA, 1)
-  PRINT *, II, JJ, KK, ZIA (II, JJ, KK)
-ENDDO
-ENDDO
-ENDDO
-!$acc end serial
-
-ENDBLOCK
 
 !     ------------------------------------------------------------------
 
