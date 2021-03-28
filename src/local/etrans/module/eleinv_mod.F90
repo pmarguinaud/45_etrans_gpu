@@ -84,12 +84,48 @@ IF (LHOOK) CALL DR_HOOK('ELEINV_MOD:ELEINV',0,ZHOOK_HANDLE)
 IRLEN=R%NDGL+R%NNOEXTZG
 ICLEN=RALD%NDGLSUR+R%NNOEXTZG
 
+WRITE (*, *) __FILE__, ':', __LINE__ 
+BLOCK
+INTEGER :: II, JJ, KK
+
+!$acc serial present (PFFA)
+DO KK = 1, SIZE (PFFA, 3)
+DO JJ = 1, SIZE (PFFA, 2)
+DO II = 1, SIZE (PFFA, 1)
+  PRINT *, II, JJ, KK, PFFA (II, JJ, KK)
+ENDDO
+ENDDO
+ENDDO
+!$acc end serial
+
+ENDBLOCK
+
+
 CALL CREATE_PLAN_FFT (IPLAN_C2R, +1, KN=IRLEN/2, KLOT=UBOUND (PFFA,2)*D%NUMP, &
                     & KISTRIDE=1, KIDIST=ICLEN/2, KOSTRIDE=1, KODIST=ICLEN)
 
 !$acc host_data use_device (PFFA) 
 CALL EXECUTE_PLAN_FFTC(IPLAN_C2R, +1, PFFA (1, 1, 1))
 !$acc end host_data
+
+WRITE (*, *) __FILE__, ':', __LINE__ 
+BLOCK
+INTEGER :: II, JJ, KK
+
+!$acc serial present (PFFA)
+DO KK = 1, SIZE (PFFA, 3)
+DO JJ = 1, SIZE (PFFA, 2)
+DO II = 1, SIZE (PFFA, 1)
+  PRINT *, II, JJ, KK, PFFA (II, JJ, KK)
+ENDDO
+ENDDO
+ENDDO
+!$acc end serial
+
+ENDBLOCK
+
+
+
 
 IF (LHOOK) CALL DR_HOOK('ELEINV_MOD:ELEINV',1,ZHOOK_HANDLE)
 

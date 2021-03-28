@@ -79,17 +79,6 @@ ENDIF
 
 OFFSET_VAR=D_NPTRLS(MYSETW)
 
-BLOCK
-INTEGER :: II, JJ
-!$acc serial
-DO JJ = 1, 10
-DO II = 1, 23
-  PRINT *, II, JJ, PREEL (1, II + 23*(JJ-1))
-ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
-
 !istat = cuda_Synchronize()
 DO KGL=IBEG,IEND,IINC
 
@@ -104,18 +93,6 @@ DO KGL=IBEG,IEND,IINC
   !$acc end host_data
 END DO
 
-WRITE (*, *) __FILE__, ':', __LINE__ 
-
-BLOCK
-INTEGER :: II, JJ
-!$acc serial
-DO JJ = 1, 10
-DO II = 1, 23
-  PRINT *, II, JJ, PREEL (1, II + 23*(JJ-1))
-ENDDO
-ENDDO
-!$acc end serial
-ENDBLOCK
 
 istat = cuda_Synchronize()
 

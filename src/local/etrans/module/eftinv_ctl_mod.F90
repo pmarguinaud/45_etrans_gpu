@@ -151,6 +151,18 @@ CALL GSTATS(1639,0)
 
   CALL FOURIER_IN(ZGTF,KF_OUT_LT) ! COPIES DATA FROM FOUBUF
 
+BLOCK
+INTEGER :: II, JJ
+WRITE (*, *) __FILE__, ':', __LINE__ 
+!$acc serial present (ZGTF)
+DO JJ = 1, SIZE (ZGTF, 2)
+DO II = 1, 2
+  PRINT *, II, JJ, ZGTF (II, JJ)
+ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
+
 !    2.  Fourier space computations
 
 IF(KF_UV > 0 .OR. KF_SCDERS > 0) THEN
@@ -161,7 +173,21 @@ ENDIF
 !   3.  Fourier transform
 IF(KF_FS > 0) THEN
   CALL FTINV(ZGTF,size(zgtf,1))
+  !$acc update host (ZGTF)
 ENDIF
+
+BLOCK
+INTEGER :: II, JJ
+WRITE (*, *) __FILE__, ':', __LINE__ 
+!$acc serial present (ZGTF)
+DO JJ = 1, SIZE (ZGTF, 2)
+DO II = 1, 2
+  PRINT *, II, JJ, ZGTF (II, JJ)
+ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
+
 
 !!$OMP END PARALLEL DO
 CALL GSTATS(1639,1)
@@ -253,7 +279,6 @@ IF(KF_SCALARS_G > 0) THEN
   ENDIF
 ENDIF
 
-!$acc wait(1)     
 CALL GSTATS(157,0)
 JF_FS=KF_FS-D%IADJUST_I
 #ifdef USE_CUDA_AWARE_MPI_FT
@@ -266,6 +291,14 @@ CALL TRLTOG(ZGTF,JF_FS,KF_GP,KF_SCALARS_G,IVSET,KPTRGP,&
  &PGP,PGPUV,PGP3A,PGP3B,PGP2)
 #endif
 CALL GSTATS(157,1)
+
+BLOCK
+INTEGER :: II
+WRITE (*, *) __FILE__, ':', __LINE__ 
+DO II = 1, SIZE (PGP, 1)
+  PRINT *, II, PGP (II, 1, 1)
+ENDDO
+ENDBLOCK
 
 IF (LHOOK) CALL DR_HOOK('EFTINV_CTL_MOD:EFTINV_CTL',1,ZHOOK_HANDLE)
 
