@@ -64,7 +64,7 @@ USE TPM_DISTR       ,ONLY : D
 
 USE TRGTOL_MOD      ,ONLY : TRGTOL
 USE FOURIER_OUT_MOD ,ONLY : FOURIER_OUT
-USE FTDIR_MOD       ,ONLY : FTDIR
+USE EFTDIR_MOD      ,ONLY : EFTDIR
 USE EXTPER_MOD      ,ONLY : EXTPER
 !
 
@@ -160,12 +160,6 @@ ENDIF
 
 CALL GSTATS(158,0)
 
-!debug
-!!$acc data present(ZGTF)
-!  ZGTF(:,:)=0._JPRBT
-!!$acc end data
-!!$acc update host(zgtf)
-! needed ??? JF_FS=KF_FS-D%IADJUST_D
 #ifdef USE_CUDA_AWARE_MPI_FT
 CALL TRGTOL_CUDAAWARE(ZGTF,KF_FS,KF_GP,KF_SCALARS_G,IVSET,KPTRGP,&
  &PGP,PGPUV,PGP3A,PGP3B,PGP2)
@@ -198,16 +192,13 @@ CALL GSTATS(1640,0)
 
 !!$OMP PARALLEL DO SCHEDULE(DYNAMIC,1) PRIVATE(JGL,IGL)
 IF(KF_FS>0) THEN
-  !!!$acc data copy(ZGTF) ! This one is already on the device
-  CALL FTDIR(size(zgtf,1))
-  !!!$acc end data
-  ! needs whole size CALL FTDIR(2*KF_FS)
+  CALL EFTDIR(size(zgtf,1))
 ENDIF
 
 ! Save Fourier data in FOUBUF_IN
 
-  CALL FOURIER_OUT(KF_FS)
-!!$OMP END PARALLEL DO
+CALL FOURIER_OUT(KF_FS)
+
 CALL GSTATS(1640,1)
 CALL GSTATS(106,1)
 
