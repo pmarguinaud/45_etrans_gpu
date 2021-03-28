@@ -79,31 +79,43 @@ ENDIF
 
 OFFSET_VAR=D_NPTRLS(MYSETW)
 
+BLOCK
+INTEGER :: II, JJ
+!$acc serial
+DO JJ = 1, 10
+DO II = 1, 23
+  PRINT *, II, JJ, PREEL (1, II + 23*(JJ-1))
+ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
+
 !istat = cuda_Synchronize()
 DO KGL=IBEG,IEND,IINC
 
-   !IF( T%LUSEFFT992(KGL) )THEN
-   !   stop 'Error: code path not (yet) supported in GPU version'
-   !END IF
-   
   ITYPE=-1
-  IJUMP= 1
   IGLG = D_NPTRLS(MYSETW)+KGL-1
-  IST  = 2*(G_NMEN(IGLG)+1)+1
-  !ILEN = G_NLOEN(IGLG)+R_NNOEXTZL+3-IST
 
-  !IF (G_NLOEN(IGLG)>1) THEN
-    IOFF=D_NSTAGTF(KGL)+1
-    !IRLEN=G_NLOEN(IGLG)+R_NNOEXTZL
-    !ICLEN=(IRLEN/2+1)*2
+  IOFF=D_NSTAGTF(KGL)+1
 
-    CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,KN=G_NLOEN(IGLG),KLOT=KFIELDS)
-    !$acc host_data use_device(PREEL)
-    CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,PREEL(1, IOFF))
-    !$acc end host_data
-
-   !ENDIF
+  CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,KN=G_NLOEN(IGLG),KLOT=SIZE (PREEL, 1))
+  !$acc host_data use_device(PREEL)
+  CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,PREEL(1, IOFF))
+  !$acc end host_data
 END DO
+
+WRITE (*, *) __FILE__, ':', __LINE__ 
+
+BLOCK
+INTEGER :: II, JJ
+!$acc serial
+DO JJ = 1, 10
+DO II = 1, 23
+  PRINT *, II, JJ, PREEL (1, II + 23*(JJ-1))
+ENDDO
+ENDDO
+!$acc end serial
+ENDBLOCK
 
 istat = cuda_Synchronize()
 
