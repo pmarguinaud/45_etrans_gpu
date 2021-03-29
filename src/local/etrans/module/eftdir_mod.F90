@@ -38,15 +38,9 @@ SUBROUTINE EFTDIR(PREEL, KFIELDS)
 
 USE PARKIND1  ,ONLY : JPIM, JPIB, JPRBT, JPRB
 
-USE TPM_DISTR       ,ONLY : D, MYSETW, MYPROC, NPROC,D_NSTAGTF,D_NPTRLS
-USE TPM_GEOMETRY    ,ONLY : G,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX
-USE TPM_FFT         ,ONLY : T, TB
-USE TPMALD_DIM      ,ONLY : RALD
-#ifdef WITH_FFTW
-USE TPM_FFTW        ,ONLY : TW, EXEC_FFTW
-#endif
+USE TPM_DISTR       ,ONLY : D
 USE TPM_FFTC        ,ONLY : CREATE_PLAN_FFT
-USE TPM_DIM         ,ONLY : R,R_NNOEXTZL
+USE TPM_DIM         ,ONLY : R
 USE CUDA_DEVICE_MOD
 !
 
@@ -54,30 +48,16 @@ IMPLICIT NONE
 
 INTEGER(KIND=JPIM),INTENT(IN)  :: KFIELDS
 REAL(KIND=JPRB), INTENT(INOUT) :: PREEL(:,:)
-INTEGER(KIND=JPIM)  :: KGL
 
-INTEGER(KIND=JPIM) :: IGLG,IST,ILEN,IJUMP,JJ,JF,IST1
-INTEGER(KIND=JPIM) :: IOFF,IRLEN,ICLEN, ITYPE
+INTEGER(KIND=JPIM) :: IRLEN,ICLEN
 INTEGER(KIND=JPIM) :: IPLAN_R2C
-INTEGER(KIND=JPIM) :: JMAX
-REAL(KIND=JPRBT)   :: SCAL
+REAL(KIND=JPRBT)   :: ZSCAL
 
-INTEGER(KIND=JPIM) :: IBEG,IEND,IINC,ISCAL
-INTEGER(KIND=JPIM) :: OFFSET_VAR, IUNIT, ISIZE
 integer :: istat
 
 !     ------------------------------------------------------------------
 
-IF(MYPROC > NPROC/2)THEN
-  IBEG=1
-  IEND=D%NDGL_FS
-  IINC=1
-ELSE
-  IBEG=D%NDGL_FS
-  IEND=1
-  IINC=-1
-ENDIF
-
+#ifdef UNDEF
 BLOCK
 INTEGER :: JF, JJ
 WRITE (*, *) __FILE__, ':', __LINE__
@@ -93,31 +73,11 @@ DO JF = 1, SIZE (PREEL, 2)
 ENDDO
 !$acc end serial
 ENDBLOCK
-
-
-#ifdef UNDEF
-OFFSET_VAR=D_NPTRLS(MYSETW)
-
-!istat = cuda_Synchronize()
-DO KGL=IBEG,IEND,IINC
-
-  ITYPE=-1
-  IGLG = D_NPTRLS(MYSETW)+KGL-1
-
-  IOFF=D_NSTAGTF(KGL)+1
-
-  CALL CREATE_PLAN_FFT(IPLAN_R2C,-1,KN=G_NLOEN(IGLG),KLOT=SIZE (PREEL, 1))
-  !$acc host_data use_device(PREEL)
-  CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,PREEL(1, IOFF))
-  !$acc end host_data
-END DO
 #endif
 
 
 IRLEN=R%NDLON+R%NNOEXTZG
 ICLEN=D%NLENGTF/D%NDGL_FS
-
-WRITE (*, *) __FILE__, ':', __LINE__, " IRLEN = ", IRLEN, " ICLEN = ", ICLEN
 
 CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=KFIELDS*D%NDGL_FS, &
                     & KISTRIDE=1, KIDIST=ICLEN, KOSTRIDE=1, KODIST=ICLEN/2)
@@ -125,7 +85,7 @@ CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=KFIELDS*D%NDGL_FS, &
 CALL EXECUTE_PLAN_FFTC (IPLAN_R2C, -1, PREEL (1, 1))
 !$acc end host_data
 
-
+#ifdef UNDEF
 BLOCK
 INTEGER :: JF, JJ
 WRITE (*, *) __FILE__, ':', __LINE__
@@ -141,49 +101,33 @@ DO JF = 1, SIZE (PREEL, 2)
 ENDDO
 !$acc end serial
 ENDBLOCK
-
-STOP
+#endif
 
 istat = cuda_Synchronize()
 
-!$acc data &
-!$acc& copy(D,D_NSTAGTF,D_NPTRLS,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX,R_NNOEXTZL) &
-!$acc& present(PREEL)
+ZSCAL = 1._JPRB / REAL (R%NDLON, JPRB)
 
-!$acc parallel loop collapse(3) private(JMAX,KGL,IOFF,SCAL)
-DO IGLG=IBEG+OFFSET_VAR-1,IEND+OFFSET_VAR-1,IINC
-   DO JJ=1, G_NLOEN_MAX+2
-      DO JF=1,KFIELDS
-         JMAX = G_NLOEN(IGLG)
-         if (JJ .le. JMAX) then
-           KGL=IGLG-OFFSET_VAR+1
-           IOFF=D_NSTAGTF(KGL)+1
-           SCAL = 1._JPRBT/REAL(G_NLOEN(IGLG),JPRBT)
-           PREEL(JF,IOFF+JJ-1)= SCAL * PREEL(JF, IOFF+JJ-1)
-         end if
-      ENDDO
-   ENDDO
-END DO
+!$acc kernels present (PREEL) copyin (ZSCAL)
+PREEL = ZSCAL * PREEL
+!$acc end kernels
 
-!$acc parallel loop 
-DO KGL=IBEG,IEND,IINC
+#ifdef UNDEF
+BLOCK
+INTEGER :: JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__
+!$acc serial present (PREEL)
+DO JF = 1, SIZE (PREEL, 2)
 
-   IGLG = D_NPTRLS(MYSETW)+KGL-1
-   IST  = 2*(G_NMEN(IGLG)+1)+1
-   ILEN = G_NLOEN(IGLG)+R_NNOEXTZL+3-IST
-   
-   IST1=1
-   IF (G_NLOEN(IGLG)==1) IST1=0
+  PRINT *, "----", JF
 
-   !$acc loop collapse(2)
-   DO JJ=IST1, ILEN
-      DO JF=1,KFIELDS
-        PREEL(JF,IST+D_NSTAGTF(KGL)+JJ-1) = 0.0_JPRBT
-      ENDDO
-   ENDDO
-END DO
-
-!$acc end data
+  DO JJ = 1, SIZE (PREEL, 1)
+    PRINT *, JJ, PREEL (JJ, JF)
+  ENDDO
+  
+ENDDO
+!$acc end serial
+ENDBLOCK
+#endif
 
 !     ------------------------------------------------------------------
 
