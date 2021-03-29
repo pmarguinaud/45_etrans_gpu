@@ -778,7 +778,7 @@ MODULE TRGTOL_MOD
   
   END SUBROUTINE TRGTOL_CUDAAWARE
   SUBROUTINE TRGTOL(PGLAT,KF_FS,KF_GP,KF_SCALARS_G,KVSET,KPTRGP,&
-   &PGP,PGPUV,PGP3A,PGP3B,PGP2)
+   &PGP,PGPUV,PGP3A,PGP3B,PGP2,LDGW)
   
   !**** *TRGTOL * - transposition of grid point data from column
   !                 structure to latitudinal. Reorganize data between
@@ -866,6 +866,7 @@ MODULE TRGTOL_MOD
   REAL(KIND=JPRB),OPTIONAL,INTENT(IN)     :: PGP3A(:,:,:,:)
   REAL(KIND=JPRB),OPTIONAL,INTENT(IN)     :: PGP3B(:,:,:,:)
   REAL(KIND=JPRB),OPTIONAL,INTENT(IN)     :: PGP2(:,:,:)
+  LOGICAL,        OPTIONAL,INTENT(IN)     :: LDGW
   
   REAL(KIND=JPRBT),ALLOCATABLE :: ZCOMBUFS(:,:),ZCOMBUFR(:,:)
   REAL(KIND=JPRBT) :: ZDUM(2)
@@ -909,6 +910,7 @@ MODULE TRGTOL_MOD
   REAL(KIND=JPRB) :: ZHOOK_HANDLE_BAR
   
   INTEGER(KIND=JPIM) :: IERROR, irank
+  LOGICAL :: LLGW
   
   REAL(KIND=JPRBT) :: TIMEF, tc
   
@@ -918,6 +920,9 @@ MODULE TRGTOL_MOD
   !              --------------------
   
   IF (LHOOK) CALL DR_HOOK('TRGTOL',0,ZHOOK_HANDLE)
+
+  LLGW = .FALSE.
+  IF (PRESENT (LDGW)) LLGW = LDGW
   
   iunit=300+myproc
 
@@ -1234,7 +1239,11 @@ MODULE TRGTOL_MOD
             !!$ACC loop private(IFLD)
             DO JFLD=1,IFLDS
               IFLD = IFLDOFF(JFLD)
-              PGLAT(JFLD,KINDEX(IPOS)) = PGP(JK,IFLD,JBLK)
+              IF (LLGW) THEN
+                PGLAT(KINDEX(IPOS),JFLD) = PGP(JK,IFLD,JBLK)
+              ELSE
+                PGLAT(JFLD,KINDEX(IPOS)) = PGP(JK,IFLD,JBLK)
+              ENDIF
             ENDDO
           ENDDO
         ELSE
@@ -1244,7 +1253,11 @@ MODULE TRGTOL_MOD
               !!$acc parallel loop private(ipos)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                ENDIF
                 !if(jfld<=5 .and. kindex(ipos)<5) write(nout,*)'trgtol: ipos=',ipos,' idx=',kindex(ipos),' jk=',jk,' lev=',iuvlevs(ifld),' pars=',iuvpars(ifld),' pglat=',PGLAT(JFLD,KINDEX(IPOS))
                 !if( jfld.eq.1 ) write(nout,*)'trgtoluv: ',kindex(ipos),' lev=',iuvlevs(ifld),' pars=',iuvpars(ifld),' pglat=',PGLAT(JFLD,KINDEX(IPOS))
               ENDDO
@@ -1252,20 +1265,32 @@ MODULE TRGTOL_MOD
               !!$acc parallel loop private(ipos)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP2(JK,IGP2PARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP2(JK,IGP2PARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP2(JK,IGP2PARS(IFLD),JBLK)
+                ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
               !!$acc parallel loop private(ipos)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                ENDIF
                 !if( jk.eq.ifirst ) write(iunit,*)'trgtol: ',JK,JFLD,IFLD,kindex(ipos),' lev=',IGP3ALEVS(ifld),' pars=',IGP3APARS(ifld),' pglat=',PGLAT(JFLD,KINDEX(IPOS))
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
               !!$acc parallel loop private(ipos)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                ENDIF
               ENDDO
             ELSE
               CALL ABORT_TRANS('TRLTOG_MOD: ERROR')
@@ -1458,7 +1483,11 @@ MODULE TRGTOL_MOD
       DO JFLD=IRECV_FLD_START,IRECV_FLD_END
         DO JL=1,ILEN
           II = KINDEX(INDOFF(IRECV)+JL)
-          PGLAT(JFLD,II) = ZCOMBUFR(JL+(JFLD-IRECV_FLD_START)*ILEN,INR)
+          IF (LLGW) THEN
+            PGLAT(II,JFLD) = ZCOMBUFR(JL+(JFLD-IRECV_FLD_START)*ILEN,INR)
+          ELSE
+            PGLAT(JFLD,II) = ZCOMBUFR(JL+(JFLD-IRECV_FLD_START)*ILEN,INR)
+          ENDIF
         ENDDO
       ENDDO
   ENDDO

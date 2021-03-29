@@ -9,7 +9,10 @@ set -e
 module unload gnu
 module load nvhpc/20.9
 
-mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.000055.dat --time 1  > AATESTPROG.eo 2>&1
+n=000045
+n=000001
+
+mpirun -np 1 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time 1  > AATESTPROG.eo 2>&1
 
 rm -f snapshot_*.png
 

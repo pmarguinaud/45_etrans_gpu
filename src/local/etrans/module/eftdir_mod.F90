@@ -41,6 +41,7 @@ USE PARKIND1  ,ONLY : JPIM, JPIB, JPRBT, JPRB
 USE TPM_DISTR       ,ONLY : D, MYSETW, MYPROC, NPROC,D_NSTAGTF,D_NPTRLS
 USE TPM_GEOMETRY    ,ONLY : G,G_NMEN,G_NMEN_MAX,G_NLOEN,G_NLOEN_MAX
 USE TPM_FFT         ,ONLY : T, TB
+USE TPMALD_DIM      ,ONLY : RALD
 #ifdef WITH_FFTW
 USE TPM_FFTW        ,ONLY : TW, EXEC_FFTW
 #endif
@@ -77,6 +78,24 @@ ELSE
   IINC=-1
 ENDIF
 
+BLOCK
+INTEGER :: JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__
+!$acc serial present (PREEL)
+DO JF = 1, SIZE (PREEL, 2)
+
+  PRINT *, "----", JF
+
+  DO JJ = 1, SIZE (PREEL, 1)
+    PRINT *, JJ, PREEL (JJ, JF)
+  ENDDO
+  
+ENDDO
+!$acc end serial
+ENDBLOCK
+
+
+#ifdef UNDEF
 OFFSET_VAR=D_NPTRLS(MYSETW)
 
 !istat = cuda_Synchronize()
@@ -92,7 +111,38 @@ DO KGL=IBEG,IEND,IINC
   CALL EXECUTE_PLAN_FFTC(IPLAN_R2C,-1,PREEL(1, IOFF))
   !$acc end host_data
 END DO
+#endif
 
+
+IRLEN=R%NDLON+R%NNOEXTZG
+ICLEN=D%NLENGTF/D%NDGL_FS
+
+WRITE (*, *) __FILE__, ':', __LINE__, " IRLEN = ", IRLEN, " ICLEN = ", ICLEN
+
+CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=KFIELDS*D%NDGL_FS, &
+                    & KISTRIDE=1, KIDIST=ICLEN, KOSTRIDE=1, KODIST=ICLEN/2)
+!$acc host_data use_device(PREEL)
+CALL EXECUTE_PLAN_FFTC (IPLAN_R2C, -1, PREEL (1, 1))
+!$acc end host_data
+
+
+BLOCK
+INTEGER :: JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__
+!$acc serial present (PREEL)
+DO JF = 1, SIZE (PREEL, 2)
+
+  PRINT *, "----", JF
+
+  DO JJ = 1, SIZE (PREEL, 1)
+    PRINT *, JJ, PREEL (JJ, JF)
+  ENDDO
+  
+ENDDO
+!$acc end serial
+ENDBLOCK
+
+STOP
 
 istat = cuda_Synchronize()
 
