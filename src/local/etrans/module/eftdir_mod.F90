@@ -76,6 +76,28 @@ ENDBLOCK
 #endif
 
 
+BLOCK
+INTEGER :: JF, JJ
+WRITE (*, *) __FILE__, ':', __LINE__
+!$acc serial
+DO JF = 1, SIZE (PREEL, 2)
+
+  PRINT *, "----", JF
+
+  DO JJ = 1, SIZE (PREEL, 1)
+    IF (MODULO (JJ, 3) == 0) THEN
+      PREEL (JJ, JF) = -1._8
+    ELSE
+      PREEL (JJ, JF) = +1._8
+    ENDIF
+    PRINT *, JJ, PREEL (JJ, JF)
+  ENDDO
+  
+ENDDO
+!$acc end serial
+ENDBLOCK
+
+
 IRLEN=R%NDLON+R%NNOEXTZG
 ICLEN=D%NLENGTF/D%NDGL_FS
 
@@ -111,7 +133,6 @@ ZSCAL = 1._JPRB / REAL (R%NDLON, JPRB)
 PREEL = ZSCAL * PREEL
 !$acc end kernels
 
-#ifdef UNDEF
 BLOCK
 INTEGER :: JF, JJ
 WRITE (*, *) __FILE__, ':', __LINE__
@@ -127,7 +148,6 @@ DO JF = 1, SIZE (PREEL, 2)
 ENDDO
 !$acc end serial
 ENDBLOCK
-#endif
 
 !     ------------------------------------------------------------------
 

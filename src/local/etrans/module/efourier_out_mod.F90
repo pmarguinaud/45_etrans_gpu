@@ -96,7 +96,7 @@ DO KGL=IBEG,IEND,IINC
         ISTA  = (D_NSTAGT1B(D_MSTABF(IPROC))+D_NPNTGTB0(JM,KGL))*2*KFIELDS
         IOFF  = 1+D_NSTAGTF(KGL)
        
-print *, JM, PREEL(IOFF+2*JM+0, JF), PREEL(IOFF+2*JM+1, JF)
+print *, JM, FOUBUF_IN(ISTA+2*JF-1), FOUBUF_IN(ISTA+2*JF  )
      end if         
    ENDDO   
 END DO
