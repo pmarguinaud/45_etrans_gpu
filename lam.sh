@@ -9,18 +9,25 @@ set -e
 module unload gnu
 module load nvhpc/20.9
 
-mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.000055.dat --time 1  > AATESTPROG.eo 2>&1
+n=000055
+n=000045
+
+mpirun -np 1 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time 1  > AATESTPROG.eo 2>&1
 
 rm -f snapshot_*.png
 
-for i in 1 2
+
+
+ff=$(mpirun -np 1 ./bin/lfitools lfilist AATESTPROG.fa 2>/dev/null | grep SURFFF | perl -pe ' $x = eval $_; $_ = $x->[0] ')
+
+for f in $ff
 do
-~/3d/glgrib/glgrib.sh --field[0].path AATESTPROG.fa%SURFFFFF.000$i --field[0].palette.name cold_hot --scene.center.on --colorbar.on 
+~/3d/glgrib/glgrib.sh --field[0].path AATESTPROG.fa%$f --field[0].palette.name cold_hot --scene.center.on --colorbar.on 
 done
 
-for i in 0 1
+for f in snapshot_*.png
 do
-mv snapshot_000$i.png ~/tmp/.
-ssh ecgate scp ~/tmp/snapshot_000$i.png phi001@90.76.140.145:tmp/snapshot_000$i.png
+mv $f ~/tmp/.
+ssh ecgate scp ~/tmp/$f phi001@90.76.140.145:tmp/$f
 done
 
