@@ -71,10 +71,6 @@ DO KGL=IBEG,IEND,IINC
             IPROC = D_NPROCM(JM)
             ISTA  = (D_NSTAGT1B(D_MSTABF(IPROC))+D_NPNTGTB0(JM,KGL))*2*KFIELDS
             IOFF  = 1+D_NSTAGTF(KGL)
-           
-            ! imaginary may be not JM+1 but JM+G_NMEN(IGLG)+1
-!           FOUBUF_IN(ISTA+2*JF-1) = PREEL(2*JF-1, 2*JM+IOFF)
-!           FOUBUF_IN(ISTA+2*JF  ) = PREEL(2*JF  , 2*JM+IOFF)
             FOUBUF_IN(ISTA+2*JF-1) = PREEL(IOFF+2*JM+0, JF)
             FOUBUF_IN(ISTA+2*JF  ) = PREEL(IOFF+2*JM+1, JF)
          end if         
@@ -82,28 +78,6 @@ DO KGL=IBEG,IEND,IINC
    ENDDO   
 END DO
 !$acc end data
-
-WRITE (*, *) __FILE__, ':', __LINE__ 
-!$acc serial present (G_NMEN_MAX, D_NPTRLS, G_NMEN, D_NPROCM, D_NSTAGT1B, D_MSTABF, D_NPNTGTB0, D_NSTAGTF, PREEL)
-DO JF=1,KFIELDS
-PRINT *, "-----", JF
-DO KGL=IBEG,IEND,IINC
-   DO JM=0,G_NMEN_MAX      
-     IGLG = D_NPTRLS(MYSETW)+KGL-1
-     JMMAX = G_NMEN(IGLG)
-     if  (JM .le. JMMAX) then
-        IPROC = D_NPROCM(JM)
-        ISTA  = (D_NSTAGT1B(D_MSTABF(IPROC))+D_NPNTGTB0(JM,KGL))*2*KFIELDS
-        IOFF  = 1+D_NSTAGTF(KGL)
-       
-print *, JM, FOUBUF_IN(ISTA+2*JF-1), FOUBUF_IN(ISTA+2*JF  )
-     end if         
-   ENDDO   
-END DO
-ENDDO
-!$acc end serial
-
-STOP
 
 END SUBROUTINE EFOURIER_OUT
 END MODULE EFOURIER_OUT_MOD

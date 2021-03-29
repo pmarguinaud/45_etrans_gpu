@@ -57,47 +57,6 @@ integer :: istat
 
 !     ------------------------------------------------------------------
 
-#ifdef UNDEF
-BLOCK
-INTEGER :: JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__
-!$acc serial present (PREEL)
-DO JF = 1, SIZE (PREEL, 2)
-
-  PRINT *, "----", JF
-
-  DO JJ = 1, SIZE (PREEL, 1)
-    PRINT *, JJ, PREEL (JJ, JF)
-  ENDDO
-  
-ENDDO
-!$acc end serial
-ENDBLOCK
-#endif
-
-
-BLOCK
-INTEGER :: JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__
-!$acc serial
-DO JF = 1, SIZE (PREEL, 2)
-
-  PRINT *, "----", JF
-
-  DO JJ = 1, SIZE (PREEL, 1)
-    IF (MODULO (JJ, 3) == 0) THEN
-      PREEL (JJ, JF) = -1._8
-    ELSE
-      PREEL (JJ, JF) = +1._8
-    ENDIF
-    PRINT *, JJ, PREEL (JJ, JF)
-  ENDDO
-  
-ENDDO
-!$acc end serial
-ENDBLOCK
-
-
 IRLEN=R%NDLON+R%NNOEXTZG
 ICLEN=D%NLENGTF/D%NDGL_FS
 
@@ -107,24 +66,6 @@ CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=KFIELDS*D%NDGL_FS, &
 CALL EXECUTE_PLAN_FFTC (IPLAN_R2C, -1, PREEL (1, 1))
 !$acc end host_data
 
-#ifdef UNDEF
-BLOCK
-INTEGER :: JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__
-!$acc serial present (PREEL)
-DO JF = 1, SIZE (PREEL, 2)
-
-  PRINT *, "----", JF
-
-  DO JJ = 1, SIZE (PREEL, 1)
-    PRINT *, JJ, PREEL (JJ, JF)
-  ENDDO
-  
-ENDDO
-!$acc end serial
-ENDBLOCK
-#endif
-
 istat = cuda_Synchronize()
 
 ZSCAL = 1._JPRB / REAL (R%NDLON, JPRB)
@@ -132,22 +73,6 @@ ZSCAL = 1._JPRB / REAL (R%NDLON, JPRB)
 !$acc kernels present (PREEL) copyin (ZSCAL)
 PREEL = ZSCAL * PREEL
 !$acc end kernels
-
-BLOCK
-INTEGER :: JF, JJ
-WRITE (*, *) __FILE__, ':', __LINE__
-!$acc serial present (PREEL)
-DO JF = 1, SIZE (PREEL, 2)
-
-  PRINT *, "----", JF
-
-  DO JJ = 1, SIZE (PREEL, 1)
-    PRINT *, JJ, PREEL (JJ, JF)
-  ENDDO
-  
-ENDDO
-!$acc end serial
-ENDBLOCK
 
 !     ------------------------------------------------------------------
 

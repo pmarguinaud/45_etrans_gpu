@@ -14,12 +14,11 @@ n=000045
 
 mpirun -np 1 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time 1  > AATESTPROG.eo 2>&1
 
-exit
 
 rm -f snapshot_*.png
 
 
-ff=$(mpirun -np 1 ./bin/lfitools lfilist AATESTPROG.fa 2>/dev/null | grep SURFFF | perl -pe ' $x = eval $_; $_ = $x->[0] ')
+ff=$(mpirun -np 1 ./bin/lfitools lfilist AATESTPROG.fa 2>/dev/null | grep SURFFF | perl -pe ' $x = eval $_; $_ = "$x->[0] "')
 
 for f in $ff
 do
