@@ -67,13 +67,13 @@ DO KGL=IBEG,IEND,IINC
       DO JF=1,KFIELDS
          IGLG = D_NPTRLS(MYSETW)+KGL-1
          JMMAX = G_NMEN(IGLG)
-         if  (JM .le. JMMAX) then
+         IF  (JM .LE. JMMAX) THEN
             IPROC = D_NPROCM(JM)
             ISTA  = (D_NSTAGT1B(D_MSTABF(IPROC))+D_NPNTGTB0(JM,KGL))*2*KFIELDS
             IOFF  = 1+D_NSTAGTF(KGL)
             FOUBUF_IN(ISTA+2*JF-1) = PREEL(IOFF+2*JM+0, JF)
             FOUBUF_IN(ISTA+2*JF  ) = PREEL(IOFF+2*JM+1, JF)
-         end if         
+         END IF         
       ENDDO
    ENDDO   
 END DO

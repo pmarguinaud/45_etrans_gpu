@@ -44,7 +44,7 @@ INTEGER(KIND=JPIM) :: KGL
 REAL(KIND=JPRBT), INTENT(OUT) :: PREEL(:,:)
 
 INTEGER(KIND=JPIM) :: JM,JF,IGLG,IPROC,IR,II,ISTA
-INTEGER(KIND=JPIM) :: IBEG,IEND,IINC
+INTEGER(KIND=JPIM) :: IBEG,IEND,IINC,IOFF
 
 !     ------------------------------------------------------------------
 
@@ -62,17 +62,18 @@ ENDIF
 !$acc& copyin(D_NPTRLS,D_NSTAGTF,D_MSTABF,D_NSTAGT0B,D_NPNTGTB0,G_NMEN,G_NMEN_MAX,D_NPROCM) &
 !$acc& present(PREEL,FOUBUF)
 
-!$acc parallel loop collapse(3) private(IGLG,IPROC,ISTA)
+!$acc parallel loop collapse(3) private(IGLG,IPROC,ISTA,IOFF)
 DO KGL=IBEG,IEND,IINC
    DO JM=0,G_NMEN_MAX      
       DO JF=1,KFIELDS     
          IGLG = D_NPTRLS(MYSETW)+KGL-1
-         if ( JM .le. G_NMEN(IGLG)) then
+         IF ( JM .LE. G_NMEN(IGLG)) THEN
             IPROC = D_NPROCM(JM)
             ISTA  = (D_NSTAGT0B(D_MSTABF(IPROC))+D_NPNTGTB0(JM,KGL))*2*KFIELDS
-            PREEL(2*JF-1,2*JM+1+D_NSTAGTF(KGL)) = FOUBUF(ISTA+2*JF-1)
-            PREEL(2*JF,  2*JM+1+D_NSTAGTF(KGL)) = FOUBUF(ISTA+2*JF  )
-         end if
+            IOFF  = 1+D_NSTAGTF(KGL)
+            PREEL(IOFF+2*JM+0, JF) = FOUBUF(ISTA+2*JF-1) 
+            PREEL(IOFF+2*JM+1, JF) = FOUBUF(ISTA+2*JF  ) 
+         END IF
       ENDDO
    ENDDO
 END DO

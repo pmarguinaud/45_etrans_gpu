@@ -50,79 +50,27 @@ USE CUDA_DEVICE_MOD
 
 IMPLICIT NONE
 
-INTEGER(KIND=JPIM),INTENT(IN) :: KFIELDS
-INTEGER(KIND=JPIM) :: KGL
-REAL(KIND=JPRBT), INTENT(INOUT)  :: PREEL(:,:)
+INTEGER (KIND=JPIM), INTENT(IN)    :: KFIELDS
+REAL (KIND=JPRBT),   INTENT(INOUT) :: PREEL(:,:)
 
-INTEGER(KIND=JPIM) :: IGLG,IST,ILEN,JJ,JF,IST1
-INTEGER(KIND=JPIM) :: IOFF,IRLEN,ICLEN, ITYPE
+INTEGER(KIND=JPIM) :: IRLEN,ICLEN
 INTEGER(KIND=JPIM) :: IPLAN_C2R
-INTEGER(KIND=JPIM) :: IBEG,IEND,IINC,ISIZE
 integer :: istat
 
 !     ------------------------------------------------------------------
 
 
+IRLEN=R%NDLON+R%NNOEXTZG
+ICLEN=D%NLENGTF/D%NDGL_FS
 
-IF(MYPROC > NPROC/2)THEN
-  IBEG=1
-  IEND=D%NDGL_FS
-  IINC=1
-ELSE
-  IBEG=D%NDGL_FS
-  IEND=1
-  IINC=-1
-ENDIF
+CALL CREATE_PLAN_FFT (IPLAN_C2R, +1, KN=IRLEN, KLOT=KFIELDS*D%NDGL_FS, &
+                    & KISTRIDE=1, KIDIST=ICLEN/2, KOSTRIDE=1, KODIST=ICLEN)
+!$acc host_data use_device(PREEL)
+CALL EXECUTE_PLAN_FFTC (IPLAN_C2R, +1, PREEL (1, 1))
+!$acc end host_data
 
-ISIZE=size(PREEL,1)
+istat = cuda_Synchronize()
 
-!$acc data &
-!$acc& copyin(D,D%NSTAGTF,D%NPTRLS,G%NMEN,G%NLOEN,R,R%NNOEXTZL) &
-!$acc& copyin(D%NSTAGTF,D%NPTRLS,G%NMEN,G%NLOEN,R%NNOEXTZL) &
-!$acc& present(PREEL)
-
-!$acc parallel loop
-DO KGL=IBEG,IEND,IINC
-
-  IGLG  = D%NPTRLS(MYSETW)+KGL-1
-  IST   = 2*(G%NMEN(IGLG)+1)+1
-  ILEN  = G%NLOEN(IGLG)+R%NNOEXTZL+3-IST
-  IST1=1
-  IF (G%NLOEN(IGLG)==1) IST1=0
-
-  !$acc loop
-  DO JJ=IST1,ILEN
-     !$acc loop
-     DO JF=1,KFIELDS
-        PREEL(JF,IST+D%NSTAGTF(KGL)+JJ-1) = 0.0_JPRBT
-     ENDDO
-  ENDDO
-
-END DO
-
-!$acc end data
-
-!istat = cuda_Synchronize()      
-DO KGL=ibeg,IEND,IINC
-
-  IGLG  = D%NPTRLS(MYSETW)+KGL-1
-  IST   = 2*(G%NMEN(IGLG)+1)+1
-  ILEN  = G%NLOEN(IGLG)+R%NNOEXTZL+3-IST
-  IST1=1
-  IF (G%NLOEN(IGLG)==1) IST1=0
-
-  IF (G%NLOEN(IGLG)>1) THEN
-     IOFF=D%NSTAGTF(KGL)+1
-
-     CALL CREATE_PLAN_FFT(IPLAN_C2R,1,KN=G%NLOEN(IGLG),KLOT=KFIELDS)
-     !$acc host_data use_device(PREEL)
-     CALL EXECUTE_PLAN_FFTC(IPLAN_C2R,1,PREEL(1, ioff))
-     !$acc end host_data
-
-  ENDIF
-
-END DO
-istat = cuda_Synchronize()      
 
 
 !     ------------------------------------------------------------------
