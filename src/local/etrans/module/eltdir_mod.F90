@@ -116,7 +116,6 @@ IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',0,ZHOOK_HANDLE)
 
 !*     1.    PREPARE WORK ARRAYS.
 !            --------------------
-
 !$acc enter data create (ZFFT)
 
 IFC = 2 * KF_FS
