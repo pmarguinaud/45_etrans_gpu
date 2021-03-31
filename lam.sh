@@ -16,10 +16,16 @@ fi
 module unload gnu
 module load nvhpc/20.9
 
+
+if [ 0 -eq 1 ]
+then
 n=000001
 n=000045
 
 mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time $N  > AATESTPROG.eo 2>&1
+else
+mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.1000x1000 --time $N  > AATESTPROG.eo 2>&1
+fi
 
 
 
