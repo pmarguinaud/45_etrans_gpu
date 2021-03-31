@@ -47,6 +47,7 @@ USE TPMALD_FFT      ,ONLY : TALD
 USE TPMALD_DIM      ,ONLY : RALD
 USE ABORT_TRANS_MOD ,ONLY : ABORT_TRANS
 USE TPM_FFTC        ,ONLY : CREATE_PLAN_FFT
+USE CUDA_DEVICE_MOD
 !
 
 IMPLICIT NONE
@@ -58,6 +59,9 @@ INTEGER(KIND=JPIM) :: IRLEN, ICLEN
 INTEGER(KIND=JPIM) :: IPLAN_R2C
 INTEGER(KIND=JPIM) :: KMLOC, JF, JJ
 REAL (KIND=JPRB)   :: ZSCAL
+
+integer :: istat
+
 !     ------------------------------------------------------------------
 
 !*       1.       PERFORM FOURIER TRANFORM.
@@ -72,6 +76,8 @@ CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=SIZE (PFFA,2)*SIZE (PFFA, 3)
 !$acc host_data use_device (PFFA) 
 CALL EXECUTE_PLAN_FFTC(IPLAN_R2C, -1, PFFA (1, 1, 1))
 !$acc end host_data
+
+istat = cuda_Synchronize()
 
 ZSCAL = 1._JPRB / REAL (IRLEN, JPRB)
 
