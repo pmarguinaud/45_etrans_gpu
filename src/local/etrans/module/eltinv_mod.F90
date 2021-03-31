@@ -112,9 +112,11 @@ IF (LHOOK) CALL DR_HOOK('ELTINV_MOD:ELTINV',0,ZHOOK_HANDLE)
 IFIRST = 1
 ILAST  = 4*KF_UV
 
-ZIA = 0._JPRB
+!$acc enter data create (ZIA) 
 
-!$acc enter data create (ZIA) copyin (ZIA)
+!$acc kernels
+ZIA = 0.0_JPRB
+!$acc end kernels
 
 IF (KF_UV > 0) THEN
 

@@ -12,7 +12,7 @@ module load nvhpc/20.9
 n=000001
 n=000045
 
-mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time 1  > AATESTPROG.eo 2>&1
+mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time 10  > AATESTPROG.eo 2>&1
 
 
 
