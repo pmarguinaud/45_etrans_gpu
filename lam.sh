@@ -17,6 +17,8 @@ module unload gnu
 module load nvhpc/20.9
 
 
+\rm -f AATESTPROG.fa
+
 if [ 0 -eq 1 ]
 then
 n=000001
