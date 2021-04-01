@@ -53,7 +53,7 @@ IMPLICIT NONE
 INTEGER (KIND=JPIM), INTENT(IN)    :: KFIELDS
 REAL (KIND=JPRBT),   INTENT(INOUT) :: PREEL(:,:)
 
-INTEGER(KIND=JPIM) :: IRLEN,ICLEN
+INTEGER(KIND=JPIM) :: IRLEN, ICLEN
 INTEGER(KIND=JPIM) :: IPLAN_C2R
 integer :: istat
 
@@ -70,8 +70,6 @@ CALL EXECUTE_PLAN_FFTC (IPLAN_C2R, +1, PREEL (1, 1))
 !$acc end host_data
 
 istat = cuda_Synchronize()
-
-
 
 !     ------------------------------------------------------------------
 
