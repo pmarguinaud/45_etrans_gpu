@@ -55,10 +55,8 @@ SUBROUTINE EFTINV_CTL(KF_UV_G,KF_SCALARS_G,&
 USE PARKIND1  ,ONLY : JPIM     ,JPRB
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
-USE TPM_GEN         ,ONLY : NERR
-!USE TPM_DIM
-!USE TPM_GEOMETRY
-USE TPM_TRANS       ,ONLY : LDIVGP, LSCDERS, LUVDER, LVORGP
+USE TPM_GEN         ,ONLY : NERR, LALLOPERM
+USE TPM_TRANS       ,ONLY : LDIVGP, LSCDERS, LUVDER, LVORGP, FOUBUF
 USE TPM_DISTR       ,ONLY : D
 
 USE EFOURIER_IN_MOD ,ONLY : EFOURIER_IN
@@ -103,23 +101,18 @@ INTEGER(KIND=JPIM) :: IVSETUV(KF_UV_G)
 INTEGER(KIND=JPIM) :: IVSETSC(KF_SCALARS_G)
 INTEGER(KIND=JPIM) :: IVSET(KF_GP)
 INTEGER(KIND=JPIM) :: J3,JGL,IGL,IOFF,IFGP2,IFGP3A,IFGP3B,IGP3APAR,IGP3BPAR
+INTEGER(KIND=JPIM) :: JF_FS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-INTEGER(KIND=JPIM) :: ist_uv, ist_sc, ist_nsders, ist_uvders, ist_ewders, JF_FS
 
-ist_uv = 1
-ist_sc = 1
-ist_nsders = 1
-ist_uvders = 1
-ist_ewders = 1
-
-
-!$acc enter data create (ZGTF)
 
 !     ------------------------------------------------------------------
 
 !    1.  Copy Fourier data to local array
 
 IF (LHOOK) CALL DR_HOOK('EFTINV_CTL_MOD:EFTINV_CTL',0,ZHOOK_HANDLE)
+
+!$acc enter data create (ZGTF)
+
 CALL GSTATS(107,0)
 
 IF(KF_UV > 0 .OR. KF_SCDERS > 0) THEN
@@ -152,6 +145,11 @@ ENDIF
 CALL GSTATS(1639,0)
 
 CALL EFOURIER_IN(ZGTF,KF_OUT_LT) ! COPIES DATA FROM FOUBUF
+
+IF (.NOT.LALLOPERM) THEN
+!$acc exit data delete (FOUBUF)
+  DEALLOCATE (FOUBUF)
+ENDIF
 
 !    2.  Fourier space computations
 

@@ -65,13 +65,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ELTDIR_CTL_MOD:ELTDIR_CTL',0,ZHOOK_HANDLE)
 
+IBLEN = D%NLENGT0B*2*KF_FS
+
+IF (ALLOCATED(FOUBUF)) THEN
+  IF (MAX(1,IBLEN) > SIZE(FOUBUF)) THEN
+!$acc exit data delete (FOUBUF)
+    DEALLOCATE(FOUBUF)
+    ALLOCATE (FOUBUF (MAX (1,IBLEN)))
+!$acc enter data create (FOUBUF)
+  ENDIF
+ELSE
+  ALLOCATE (FOUBUF (MAX (1,IBLEN)))
+!$acc enter data create (FOUBUF)
+ENDIF
+
 !$acc update host(FOUBUF_IN) async(1)
 !$acc wait(1)
 
-IBLEN = D%NLENGT0B*2*KF_FS
 CALL GSTATS(153,0)
 CALL TRLTOM(FOUBUF_IN,FOUBUF,2*KF_FS)
 CALL GSTATS(153,1)
+
+IF (.NOT.LALLOPERM) THEN
+!$acc exit data delete (FOUBUF_IN)
+  DEALLOCATE (FOUBUF_IN)
+ENDIF
 
 ! Periodization of auxiliary fields in y direction
 
@@ -92,6 +110,11 @@ IF(KF_FS>0) THEN
 ENDIF
 CALL GSTATS(1645,1)
   
+IF (.NOT.LALLOPERM) THEN
+!$acc exit data delete (FOUBUF)
+  DEALLOCATE (FOUBUF)
+ENDIF
+
 IF (LHOOK) CALL DR_HOOK('ELTDIR_CTL_MOD:ELTDIR_CTL',1,ZHOOK_HANDLE)
 
 !     -----------------------------------------------------------------

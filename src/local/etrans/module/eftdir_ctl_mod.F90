@@ -174,6 +174,19 @@ ENDIF
 
 ! Fourier transform
 
+IBLEN=D%NLENGT0B*2*KF_FS
+IF (ALLOCATED(FOUBUF_IN)) THEN
+  IF (MAX(1,IBLEN) > SIZE(FOUBUF_IN)) THEN
+!$acc exit data delete (FOUBUF_IN)
+    DEALLOCATE(FOUBUF_IN)
+    ALLOCATE(FOUBUF_IN(MAX(1,IBLEN)))
+!$acc enter data create (FOUBUF_IN)
+  ENDIF
+ELSE
+  ALLOCATE(FOUBUF_IN(MAX(1,IBLEN)))
+!$acc enter data create (FOUBUF_IN)
+ENDIF
+
 CALL GSTATS(1640,0)
 
 IF(KF_FS>0) THEN
