@@ -1,6 +1,6 @@
 MODULE EPRFI2_MOD
 CONTAINS
-SUBROUTINE EPRFI2(KF_FS,PFFA)
+SUBROUTINE EPRFI2(KF_FS,PFFT)
 
 !**** *EPRFI2* - Prepare input work arrays for direct transform
 
@@ -67,15 +67,14 @@ USE EPRFI2B_MOD     ,ONLY : EPRFI2B
 IMPLICIT NONE
 
 INTEGER(KIND=JPIM) , INTENT(IN) :: KF_FS
-
-REAL(KIND=JPRBT) , INTENT(OUT) :: PFFA(:,:,:)
+REAL(KIND=JPRBT) , INTENT(OUT) :: PFFT(:,:,:)
 
 !     ------------------------------------------------------------------
 
 !*       2.    EXTRACT SYM./ANTISYM. FIELDS FROM TIME T+1.
 !              -------------------------------------------
 
-CALL EPRFI2B(KF_FS,PFFA)
+CALL EPRFI2B(KF_FS,PFFT)
 
 !     ------------------------------------------------------------------
 

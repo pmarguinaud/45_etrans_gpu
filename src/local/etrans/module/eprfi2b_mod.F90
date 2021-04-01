@@ -1,6 +1,6 @@
 MODULE EPRFI2B_MOD
 CONTAINS
-SUBROUTINE EPRFI2B(KFIELD,PFFA)
+SUBROUTINE EPRFI2B(KFIELD,PFFT)
 
 !**** *EPRFI2B* - Prepare input work arrays for direct transform
 
@@ -61,13 +61,11 @@ IMPLICIT NONE
 
 INTEGER(KIND=JPIM),INTENT(IN)  :: KFIELD
 INTEGER(KIND=JPIM) :: KM, KMLOC
-REAL(KIND=JPRBT)  , INTENT(OUT) :: PFFA(:,:,:)
+REAL(KIND=JPRBT)  , INTENT(OUT) :: PFFT(:,:,:)
 
-INTEGER(KIND=JPIM) ::  ISTAN, JF, JGL
-INTEGER(KIND=JPIM) :: IJR,IJI
+INTEGER(KIND=JPIM) :: ISTAN, JF, JGL
+INTEGER(KIND=JPIM) :: IJR, IJI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-INTEGER :: J, N
 
 !     ------------------------------------------------------------------
 
@@ -77,12 +75,12 @@ IF (LHOOK) CALL DR_HOOK('EPRFI2B_MOD:EPRFI2B',0,ZHOOK_HANDLE)
 !              ------------------------------------------------
 
 !$acc data &
-!$acc& present(PFFA) &
+!$acc& present(PFFT) &
 !$acc& present(FOUBUF) &
-!$acc& COPY(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
+!$acc& copy(R_NDGL,D_NSTAGT1B,D_NPNTGTB1,D_NPROCL,D_NUMP,D_MYMS,G_NDGLU)
   
 !loop over wavenumber
-!$ACC parallel loop collapse(3) private(ISTAN,KM,IJR,IJI)
+!$acc parallel loop collapse(3) private(ISTAN,KM,IJR,IJI)
 DO KMLOC = 1, D_NUMP
   DO JGL=1,R_NDGL
     DO JF =1,KFIELD
@@ -90,8 +88,8 @@ DO KMLOC = 1, D_NUMP
       IJR = 2*(JF-1)+1
       IJI = IJR+1
       ISTAN = (D_NSTAGT1B(D_NPROCL(JGL) )+D_NPNTGTB1(KMLOC,JGL ))*2*KFIELD
-      PFFA(JGL,IJR,KMLOC) = FOUBUF(ISTAN+IJR)
-      PFFA(JGL,IJI,KMLOC) = FOUBUF(ISTAN+IJI)
+      PFFT(JGL,IJR,KMLOC) = FOUBUF(ISTAN+IJR)
+      PFFT(JGL,IJI,KMLOC) = FOUBUF(ISTAN+IJI)
     ENDDO
   ENDDO
 ENDDO
