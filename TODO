@@ -1,5 +1,4 @@
 change execute_plan so that I do not need to pass +/-1
 clean efourier_in_mod.F90 & efourier_out_mod.F90 (take LAM specificities into account)
 change local variable names (K->I)
-change acc enter/exit data to acc data
 try managed mode

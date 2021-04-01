@@ -26,8 +26,8 @@ n=000045
 
 mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.20x20 --field-file 20x20/AATESTPROG.20x20.gp.$n.dat --time $N  > AATESTPROG.eo 2>&1
 else
-#mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.1000x1000 --time $N  > AATESTPROG.eo 2>&1
-mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.100x100 --time $N  > AATESTPROG.eo 2>&1
+mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.1000x1000 --time $N  > AATESTPROG.eo 2>&1
+#mpirun -np 4 ./bin/AATESTPROG --namelist fort.4.100x100 --time $N  > AATESTPROG.eo 2>&1
 fi
 
 

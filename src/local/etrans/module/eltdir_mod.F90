@@ -116,7 +116,7 @@ IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',0,ZHOOK_HANDLE)
 
 !*     1.    PREPARE WORK ARRAYS.
 !            --------------------
-!$acc enter data create (ZFFT)
+!$acc data create (ZFFT)
 
 IFC = 2 * KF_FS
 
@@ -184,7 +184,7 @@ ENDIF
 CALL EUPDSP(KF_UV,KF_SCALARS,ZFFT,ZVODI, &
  & PSPVOR,PSPDIV,PSPSCALAR,PSPSC3A,PSPSC3B,PSPSC2,KFLDPTRUV,KFLDPTRSC)
 
-!$acc exit data delete (ZFFT)
+!$acc end data
 
 IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',1,ZHOOK_HANDLE)
 !     ------------------------------------------------------------------
