@@ -89,20 +89,28 @@ IF (LHOOK) CALL DR_HOOK('EUVTVD_COMM_MOD:EUVTVD_COMM',0,ZHOOK_HANDLE)
 !              ------------------------------------------
 
 IF (KM == 0) THEN
+!$acc data copyout (PSPMEANU, PSPMEANV) 
+!$acc data copyin (KFLDPTR) if(present (KFLDPTR))
   IF (PRESENT(KFLDPTR)) THEN
+!$acc parallel loop present (PU, PV)
     DO J = 1, KFIELD
       IR = 2*J-1
       IFLD=KFLDPTR(J)
       PSPMEANU(IFLD)=PU(1,IR)
       PSPMEANV(IFLD)=PV(1,IR)
     ENDDO
+!$acc end parallel loop 
   ELSE
+!$acc parallel loop present (PU, PV)
     DO J = 1, KFIELD
       IR = 2*J-1
       PSPMEANU(J)=PU(1,IR)
       PSPMEANV(J)=PV(1,IR)
     ENDDO
+!$acc end parallel loop 
   ENDIF
+!$acc end data
+!$acc end data
 ENDIF
 IF (NPRTRW > 1 .AND. KFIELD > 0) THEN
   IF (KM == 0) THEN
