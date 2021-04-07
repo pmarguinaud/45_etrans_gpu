@@ -127,25 +127,30 @@ DO JM = 1, D_NUMP
   ENDDO
 ENDDO
 
-DO JM = 1, D_NUMP
-  IM = D_MYMS (JM)
-  IF (IM == 0) THEN
-    IF (PRESENT(KFLDPTR)) THEN
-      DO J = 1, KFIELD
+IF (PRESENT(KFLDPTR)) THEN
+  DO J = 1, KFIELD
+    DO JM = 1, D_NUMP
+      IM = D_MYMS (JM)
+      IF (IM == 0) THEN
         IR = 2*J-1
         IFLD=KFLDPTR(J)
         PU(1,IR,JM)=PSPMEANU(IFLD)
         PV(1,IR,JM)=PSPMEANV(IFLD)
-      ENDDO
-    ELSE
-      DO J = 1, KFIELD
+      ENDIF
+    ENDDO
+  ENDDO
+ELSE
+  DO J = 1, KFIELD
+    DO JM = 1, D_NUMP
+      IM = D_MYMS (JM)
+      IF (IM == 0) THEN
         IR = 2*J-1
         PU(1,IR,JM)=PSPMEANU(J)
         PV(1,IR,JM)=PSPMEANV(J)
-      ENDDO
-    ENDIF
-  ENDIF
-ENDDO
+      ENDIF
+    ENDDO
+  ENDDO
+ENDIF
 
 IF (LHOOK) CALL DR_HOOK('EVDTUV_MOD:EVDTUV',1,ZHOOK_HANDLE)
 
