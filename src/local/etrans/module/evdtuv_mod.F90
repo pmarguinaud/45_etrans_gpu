@@ -86,12 +86,10 @@ REAL(KIND=JPRB) :: ZIN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('EVDTUV_MOD:EVDTUV',0,ZHOOK_HANDLE)
 
-PU = 0.
-PV = 0.
-
-
 JNMAX = MAXVAL (DALD%NCPL2M)
 
+!$acc parallel loop collapse (3) private (JM, J, JN, IM, IN, ZIN) &
+!$acc & present (D_NUMP, D_MYMS, DALD_NCPL2M, PU, PV, PVOR, PDIV)
 DO JM = 1, D_NUMP
   DO J=1,2*KFIELD
     DO JN=1,JNMAX,2
@@ -107,7 +105,10 @@ DO JM = 1, D_NUMP
     ENDDO
   ENDDO
 ENDDO
+!$acc end parallel loop
 
+!$acc parallel loop collapse (3) private (JM, J, JN, IM, ZKM, IR, II, IJ, ZLEPINM) &
+!$acc & present (D_NUMP, D_MYMS, DALD_NCPL2M, FALD_RLEPINM, PU, PV, PDIV, PVOR)
 DO JM = 1, D_NUMP
   DO J=1,KFIELD
     DO JN=1,JNMAX
@@ -126,8 +127,11 @@ DO JM = 1, D_NUMP
     ENDDO
   ENDDO
 ENDDO
+!$acc end parallel loop
 
 IF (PRESENT(KFLDPTR)) THEN
+!$acc parallel loop collapse (2) private (J, JM, IM, IR, IFLD) &
+!$acc & present (D_NUMP, D_MYMS, PU, PV) copyin (PSPMEANU, PSPMEANV, KFLDPTR)
   DO J = 1, KFIELD
     DO JM = 1, D_NUMP
       IM = D_MYMS (JM)
@@ -139,7 +143,10 @@ IF (PRESENT(KFLDPTR)) THEN
       ENDIF
     ENDDO
   ENDDO
+!$acc end parallel loop
 ELSE
+!$acc parallel loop collapse (2) private (J, JM, IM, IR) &
+!$acc & present (D_NUMP, D_MYMS, PU, PV) copyin (PSPMEANU, PSPMEANV)
   DO J = 1, KFIELD
     DO JM = 1, D_NUMP
       IM = D_MYMS (JM)
@@ -150,6 +157,7 @@ ELSE
       ENDIF
     ENDDO
   ENDDO
+!$acc end parallel loop
 ENDIF
 
 IF (LHOOK) CALL DR_HOOK('EVDTUV_MOD:EVDTUV',1,ZHOOK_HANDLE)
