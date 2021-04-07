@@ -133,7 +133,6 @@ IF (KF_UV > 0) THEN
   ILAST = ILAST+4*KF_UV
 
   !$acc update host (ZFFT(:,IVORL:IVORU,:), ZFFT(:,IDIVL:IDIVU,:))
-!##$acc update host (ZFFT(:,IUL:IUU,:), ZFFT(:,IVL:IVU,:))
   CALL EVDTUV(KF_UV,KFLDPTRUV,ZFFT(:,IVORL:IVORU,:),ZFFT(:,IDIVL:IDIVU,:),&
    & ZFFT(:,IUL:IUU,:),ZFFT(:,IVL:IVU,:),PSPMEANU,PSPMEANV)
   !$acc update device (ZFFT(:,IUL:IUU,:), ZFFT(:,IVL:IVU,:))
