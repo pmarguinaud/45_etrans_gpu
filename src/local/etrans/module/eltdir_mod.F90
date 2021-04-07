@@ -117,6 +117,11 @@ IF (LHOOK) CALL DR_HOOK('ELTDIR_MOD:ELTDIR',0,ZHOOK_HANDLE)
 !            --------------------
 !$acc data create (ZFFT, ZVODI)
 
+!$acc kernels
+ZFFT = 0._JPRB
+ZVODI = 0._JPRB
+!$acc end kernels
+
 IFC = 2 * KF_FS
 
 CALL EPRFI2(KF_FS,ZFFT)
@@ -162,7 +167,6 @@ IF( KF_UV > 0 ) THEN
 
   CALL EUVTVD(KF_UV,ZFFT(:,IUS:IUE,:),ZFFT(:,IVS:IVE,:),&
    & ZVODI(:,IVORS:IVORE,:),ZVODI(:,IDIVS:IDIVE,:))
-
 
 !*     5.    COMMUNICATION OF MEAN WIND
 !            --------------------------
