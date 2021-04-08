@@ -41,8 +41,8 @@ USE PARKIND1  ,ONLY : JPIM     ,JPRB
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
 USE TPM_TRANS       ,ONLY : LUVDER
-USE TPM_DISTR       ,ONLY : D, MYSETW
-USE TPM_GEOMETRY    ,ONLY : G
+USE TPM_DISTR       ,ONLY : D, MYSETW, D_NPTRLS, D_NSTAGTF
+USE TPM_GEOMETRY    ,ONLY : G, G_NMEN
 USE TPMALD_GEO      ,ONLY : GALD
 !
 
@@ -64,15 +64,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('EFSC_MOD:EFSC',0,ZHOOK_HANDLE)
 
-!$acc update host (PUV, PUVDERS) if (LUVDER)
+!#acc update host (PUV, PUVDERS) if (LUVDER)
+!#acc update host (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
 
-!$acc update host (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
-
-DO JGL = 1, D%NDGL_FS
-
-  IGLG    = D%NPTRLS(MYSETW)+JGL-1
-  IMEN    = G%NMEN(IGLG)
-  ISTAGTF = D%NSTAGTF(JGL)
   
 !     ------------------------------------------------------------------
   
@@ -81,37 +75,50 @@ DO JGL = 1, D%NDGL_FS
   
 !*       2.1      U AND V.
   
-  IF(LUVDER)THEN
-    DO JM=0,IMEN
-      ZIM=REAL(JM,JPRB)*GALD%EXWN
-      IR = ISTAGTF+2*JM+1
-      II = IR+1
-      DO JF=1,2*KF_UV
+IF(LUVDER)THEN
+!$acc parallel loop collapse (2) private (JF, JGL, IGLG, IMEN, ISTAGTF, JM, ZIM, IR, II) &
+!$acc & present (D_NPTRLS, G_NMEN, D_NSTAGTF, PUVDERS, PUV)
+  DO JF=1,2*KF_UV
+    DO JGL = 1, D%NDGL_FS
+      IGLG    = D_NPTRLS(MYSETW)+JGL-1
+      IMEN    = G_NMEN(IGLG)
+      ISTAGTF = D_NSTAGTF(JGL)
+      DO JM=0,IMEN
+        ZIM=REAL(JM,JPRB)*GALD%EXWN
+        IR = ISTAGTF+2*JM+1
+        II = IR+1
         PUVDERS(IR,JF) = -PUV(II,JF)*ZIM
         PUVDERS(II,JF) =  PUV(IR,JF)*ZIM
       ENDDO
     ENDDO
-  ENDIF
+  ENDDO
+!$acc end parallel loop
+ENDIF
   
 !*       2.2     SCALAR VARIABLES
   
-  IF(KF_SCDERS > 0)THEN
-    DO JM=0,IMEN
-      ZIM=REAL(JM,JPRB)*GALD%EXWN
-      IR = ISTAGTF+2*JM+1
-      II = IR+1
-      DO JF=1,KF_SCALARS
+IF(KF_SCDERS > 0)THEN
+!$acc parallel loop collapse (2) private (JF, JGL, IGLG, IMEN, ISTAGTF, JM, ZIM, IR, II) &
+!$acc & present (D_NPTRLS, G_NMEN, D_NSTAGTF, PEWDERS, PSCALAR)
+  DO JF=1,KF_SCALARS
+    DO JGL = 1, D%NDGL_FS
+      IGLG    = D_NPTRLS(MYSETW)+JGL-1
+      IMEN    = G_NMEN(IGLG)
+      ISTAGTF = D_NSTAGTF(JGL)
+      DO JM=0,IMEN
+        ZIM=REAL(JM,JPRB)*GALD%EXWN
+        IR = ISTAGTF+2*JM+1
+        II = IR+1
         PEWDERS(IR,JF) = -PSCALAR(II,JF)*ZIM
         PEWDERS(II,JF) =  PSCALAR(IR,JF)*ZIM
       ENDDO
     ENDDO
-  ENDIF
+  ENDDO
+!$acc end parallel loop
+ENDIF
 
-ENDDO
-
-!$acc update device (PUV, PUVDERS) if (LUVDER)
-
-!$acc update device (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
+!#acc update device (PUV, PUVDERS) if (LUVDER)
+!#acc update device (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
 
 IF (LHOOK) CALL DR_HOOK('EFSC_MOD:EFSC',1,ZHOOK_HANDLE)
 
