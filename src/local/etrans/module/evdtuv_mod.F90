@@ -90,17 +90,17 @@ JNMAX = MAXVAL (DALD%NCPL2M)
 
 !$acc parallel loop collapse (3) private (JM, J, JN, IM, IN, ZIN) &
 !$acc & present (D_NUMP, D_MYMS, DALD_NCPL2M, PU, PV, PVOR, PDIV)
-DO JM = 1, D_NUMP
-  DO J=1,2*KFIELD
+DO J=1,2*KFIELD
+  DO JM = 1, D_NUMP
     DO JN=1,JNMAX,2
       IM = D_MYMS (JM)
       IF (JN <= DALD_NCPL2M(IM)) THEN
         IN = (JN-1)/2
         ZIN = REAL(IN,JPRB)*GALD%EYWN
-        PU(JN  ,J,JM) = -ZIN*PVOR(JN+1,J,JM)
-        PU(JN+1,J,JM) =  ZIN*PVOR(JN,  J,JM)
-        PV(JN  ,J,JM) = -ZIN*PDIV(JN+1,J,JM)
-        PV(JN+1,J,JM) =  ZIN*PDIV(JN,  J,JM)
+        PU(JN  ,JM,J) = -ZIN*PVOR(JN+1,JM,J)
+        PU(JN+1,JM,J) =  ZIN*PVOR(JN  ,JM,J)
+        PV(JN  ,JM,J) = -ZIN*PDIV(JN+1,JM,J)
+        PV(JN+1,JM,J) =  ZIN*PDIV(JN  ,JM,J)
       ENDIF
     ENDDO
   ENDDO
@@ -109,8 +109,8 @@ ENDDO
 
 !$acc parallel loop collapse (3) private (JM, J, JN, IM, ZKM, IR, II, IJ, ZLEPINM) &
 !$acc & present (D_NUMP, D_MYMS, DALD_NCPL2M, FALD_RLEPINM, PU, PV, PDIV, PVOR)
-DO JM = 1, D_NUMP
-  DO J=1,KFIELD
+DO J=1,KFIELD
+  DO JM = 1, D_NUMP
     DO JN=1,JNMAX
       IM = D_MYMS (JM)
       ZKM=REAL(IM,JPRB)*GALD%EXWN
@@ -119,10 +119,10 @@ DO JM = 1, D_NUMP
       IF (JN <= DALD_NCPL2M(IM)) THEN
         IJ=(JN-1)/2
         ZLEPINM = FALD_RLEPINM(DALD_NPME(IM)+IJ)
-        PU(JN,IR,JM)= ZLEPINM*(-ZKM*PDIV(JN,II,JM)-PU(JN,IR,JM))
-        PU(JN,II,JM)= ZLEPINM*( ZKM*PDIV(JN,IR,JM)-PU(JN,II,JM))
-        PV(JN,IR,JM)= ZLEPINM*(-ZKM*PVOR(JN,II,JM)+PV(JN,IR,JM))
-        PV(JN,II,JM)= ZLEPINM*( ZKM*PVOR(JN,IR,JM)+PV(JN,II,JM))
+        PU(JN,JM,IR)= ZLEPINM*(-ZKM*PDIV(JN,JM,II)-PU(JN,JM,IR))
+        PU(JN,JM,II)= ZLEPINM*( ZKM*PDIV(JN,JM,IR)-PU(JN,JM,II))
+        PV(JN,JM,IR)= ZLEPINM*(-ZKM*PVOR(JN,JM,II)+PV(JN,JM,IR))
+        PV(JN,JM,II)= ZLEPINM*( ZKM*PVOR(JN,JM,IR)+PV(JN,JM,II))
       ENDIF
     ENDDO
   ENDDO
@@ -138,8 +138,8 @@ IF (PRESENT(KFLDPTR)) THEN
       IF (IM == 0) THEN
         IR = 2*J-1
         IFLD=KFLDPTR(J)
-        PU(1,IR,JM)=PSPMEANU(IFLD)
-        PV(1,IR,JM)=PSPMEANV(IFLD)
+        PU(1,JM,IR)=PSPMEANU(IFLD)
+        PV(1,JM,IR)=PSPMEANV(IFLD)
       ENDIF
     ENDDO
   ENDDO
@@ -152,8 +152,8 @@ ELSE
       IM = D_MYMS (JM)
       IF (IM == 0) THEN
         IR = 2*J-1
-        PU(1,IR,JM)=PSPMEANU(J)
-        PV(1,IR,JM)=PSPMEANV(J)
+        PU(1,JM,IR)=PSPMEANU(J)
+        PV(1,JM,IR)=PSPMEANV(J)
       ENDIF
     ENDDO
   ENDDO

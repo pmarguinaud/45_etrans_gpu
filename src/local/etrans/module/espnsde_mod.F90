@@ -86,15 +86,15 @@ JNMAX = MAXVAL (DALD%NCPL2M)
 
 !$acc parallel loop collapse (3) private (JM, J, JN, IM, IN, ZIN) &
 !$acc & present (D_NUMP, D_MYMS, DALD_NCPL2M, PNSD, PF)
-DO JM = 1, D_NUMP
-  DO J=1,2*KF_SCALARS
+DO J=1,2*KF_SCALARS
+  DO JM = 1, D_NUMP
     DO JN=1,JNMAX,2
       IM = D_MYMS(JM)
       IF (JN <= DALD_NCPL2M(IM)) THEN
         IN =(JN-1)/2
         ZIN = REAL(IN,JPRB)*GALD%EYWN
-        PNSD(JN  ,J,JM) = -ZIN*PF(JN+1,J,JM)
-        PNSD(JN+1,J,JM) =  ZIN*PF(JN  ,J,JM)
+        PNSD(JN  ,JM,J) = -ZIN*PF(JN+1,JM,J)
+        PNSD(JN+1,JM,J) =  ZIN*PF(JN  ,JM,J)
       ENDIF
     ENDDO
   ENDDO
