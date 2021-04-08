@@ -57,7 +57,7 @@ REAL(KIND=JPRB) ,   INTENT(INOUT)  :: PFFT(:,:,:)
 
 INTEGER(KIND=JPIM) :: IRLEN, ICLEN
 INTEGER(KIND=JPIM) :: IPLAN_R2C
-INTEGER(KIND=JPIM) :: JMLOC, JF, JJ
+INTEGER(KIND=JPIM) :: JM, JF, JJ
 REAL (KIND=JPRB)   :: ZSCAL
 
 integer :: istat
@@ -70,7 +70,7 @@ integer :: istat
 IRLEN=R%NDGL+R%NNOEXTZG
 ICLEN=RALD%NDGLSUR+R%NNOEXTZG
 
-CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=SIZE (PFFT,2)*SIZE (PFFT, 3), &
+CALL CREATE_PLAN_FFT (IPLAN_R2C, -1, KN=IRLEN, KLOT=D%NUMP*KFC, &
                     & KISTRIDE=1, KIDIST=ICLEN, KOSTRIDE=1, KODIST=ICLEN/2)
 
 !$acc host_data use_device (PFFT) 
@@ -82,10 +82,10 @@ istat = cuda_Synchronize()
 ZSCAL = 1._JPRB / REAL (IRLEN, JPRB)
 
 !$acc parallel loop collapse (3) copyin (D_NUMP, KFC, ICLEN, ZSCAL) present (PFFT)
-DO JMLOC = 1, D_NUMP
-  DO JF = 1, KFC
+DO JF = 1, KFC
+  DO JM = 1, D_NUMP
     DO JJ = 1, ICLEN
-      PFFT (JJ, JF, JMLOC) = PFFT (JJ, JF, JMLOC) * ZSCAL
+      PFFT (JJ, JM, JF) = PFFT (JJ, JM, JF) * ZSCAL
     ENDDO
   ENDDO
 ENDDO

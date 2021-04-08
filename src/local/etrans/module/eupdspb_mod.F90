@@ -79,10 +79,10 @@ IF(PRESENT(KFLDPTR)) THEN
         IR= 2*JFLD-1
         II=IR+1
         IFLD = KFLDPTR(JFLD)
-        PSPEC(IFLD,INM)    =POA(JN  ,IR,JM)
-        PSPEC(IFLD,INM+1)  =POA(JN+1,IR,JM)
-        PSPEC(IFLD,INM+2)  =POA(JN  ,II,JM)
-        PSPEC(IFLD,INM+3)  =POA(JN+1,II,JM)
+        PSPEC(IFLD,INM)    =POA(JN  ,JM,IR)
+        PSPEC(IFLD,INM+1)  =POA(JN+1,JM,IR)
+        PSPEC(IFLD,INM+2)  =POA(JN  ,JM,II)
+        PSPEC(IFLD,INM+3)  =POA(JN+1,JM,II)
       ENDDO
     ENDDO
 
@@ -98,10 +98,10 @@ ELSE
       DO JFLD=1,KFIELD
         IR= 2*JFLD-1
         II=IR+1
-        PSPEC(JFLD,INM)    =POA(JN  ,IR,JM)
-        PSPEC(JFLD,INM+1)  =POA(JN+1,IR,JM)
-        PSPEC(JFLD,INM+2)  =POA(JN  ,II,JM)
-        PSPEC(JFLD,INM+3)  =POA(JN+1,II,JM)
+        PSPEC(JFLD,INM)    =POA(JN  ,JM,IR)
+        PSPEC(JFLD,INM+1)  =POA(JN+1,JM,IR)
+        PSPEC(JFLD,INM+2)  =POA(JN  ,JM,II)
+        PSPEC(JFLD,INM+3)  =POA(JN+1,JM,II)
       ENDDO
     ENDDO
   

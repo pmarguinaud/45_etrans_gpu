@@ -66,8 +66,8 @@ USE EPRFI2B_MOD     ,ONLY : EPRFI2B
 
 IMPLICIT NONE
 
-INTEGER(KIND=JPIM) , INTENT(IN) :: KF_FS
-REAL(KIND=JPRBT) , INTENT(OUT) :: PFFT(:,:,:)
+INTEGER(KIND=JPIM) , INTENT(IN)  :: KF_FS
+REAL(KIND=JPRBT)   , INTENT(OUT) :: PFFT(:,:,:)
 
 !     ------------------------------------------------------------------
 

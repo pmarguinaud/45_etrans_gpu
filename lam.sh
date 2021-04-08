@@ -11,7 +11,7 @@ module load nvhpc/20.9
 
 
 mpirun -np 4 ./bin/AATESTPROGDER \
-  --namelist fort.4.1000x1000 \
+  --namelist fort.4.100x100 \
   --time 1 > AATESTPROG.eo 2>&1
 
 for f in *.fa
