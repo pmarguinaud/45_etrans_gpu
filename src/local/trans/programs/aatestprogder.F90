@@ -582,7 +582,7 @@ IF (MYPROC == 1) THEN
           ZVAL = ZX * (1. - ZX) * ZY * (1. - ZY)
           ZVAL = ZVAL * ZVAL
           ZVALDX = ZY * (1. - ZY) * ZY * (1. - ZY) * (4. * ZX * ZX * ZX - 6. * ZX * ZX + 2. * ZX)
-          ZVALDX = ZX * (1. - ZX) * ZX * (1. - ZX) * (4. * ZY * ZY * ZY - 6. * ZY * ZY + 2. * ZY)
+          ZVALDY = ZX * (1. - ZX) * ZX * (1. - ZX) * (4. * ZY * ZY * ZY - 6. * ZY * ZY + 2. * ZY)
         ELSE
           ZLAT = + RPI * (0.5_JPRB - REAL (JLAT, JPRB) / REAL (NDGLG+1, JPRB))
           ZLON = 2 * RPI * REAL (JLON-1, JPRB) / REAL (NLOEN (JLAT))

@@ -178,8 +178,7 @@ IF (KF_SCDERS > 0) THEN
   ISU = ISL+2*KF_SCALARS-1
   IDL = 2*(4*KF_UV+KF_SCALARS)+1
   IDU = IDL+2*KF_SCDERS-1
-  CALL ABOR1 ('')
-! CALL ESPNSDE(KM,KF_SCALARS,ZFFT(:,ISL:ISU),ZFFT(:,IDL:IDU))
+  CALL ESPNSDE(KF_SCALARS,ZFFT(:,ISL:ISU,:),ZFFT(:,IDL:IDU,:))
 ENDIF
 
 !     ------------------------------------------------------------------
