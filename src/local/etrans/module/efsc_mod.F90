@@ -64,10 +64,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('EFSC_MOD:EFSC',0,ZHOOK_HANDLE)
 
-!#acc update host (PUV, PUVDERS) if (LUVDER)
-!#acc update host (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
-
-  
 !     ------------------------------------------------------------------
   
 !*           EAST-WEST DERIVATIVES
@@ -116,9 +112,6 @@ IF(KF_SCDERS > 0)THEN
   ENDDO
 !$acc end parallel loop
 ENDIF
-
-!#acc update device (PUV, PUVDERS) if (LUVDER)
-!#acc update device (PSCALAR, PNSDERS, PEWDERS) if (KF_SCDERS > 0)
 
 IF (LHOOK) CALL DR_HOOK('EFSC_MOD:EFSC',1,ZHOOK_HANDLE)
 
