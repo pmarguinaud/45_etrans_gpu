@@ -130,21 +130,8 @@ CALL EPRFI2(KF_FS,ZFFT)
 !            ------------------------------
 
 IF(R%NNOEXTZG>0) THEN
-  CALL ABOR1 ('BROKEN R%NNOEXTZG>0')
-!   DO JF = 1,IFC
-!     DO JDIM = 1,R%NDGL
-!       ZFFT2(JF,JDIM)=ZFFT(JDIM,JF,JM)
-!     ENDDO
-!   ENDDO
-!   IINDEX(1)=0
-!   CALL EXTPER(ZFFT2(:,:),R%NDGL+R%NNOEXTZG,1,R%NDGL,IFC,1,IINDEX,0)
-!   DO JF = 1,IFC
-!     DO JDIM = 1,R%NDGL+R%NNOEXTZG
-!       ZFFT(JDIM,JF,JM) = ZFFT2(JF,JDIM)
-!     ENDDO
-!   ENDDO
+  CALL ABOR1 ('ELTDIR: BIPERIODICIZATION NOT SUPPORTED')
 ENDIF
-
 
 !*     3.    DIRECT LEGENDRE TRANSFORM.
 !            --------------------------
