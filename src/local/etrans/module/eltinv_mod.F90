@@ -145,8 +145,8 @@ IF(KF_SCALARS > 0)THEN
     IF(PRESENT(PSPSC2) .AND. NF_SC2 > 0) THEN
       IFIRST = ILAST+1
       ILAST  = IFIRST-1+2*NF_SC2
-      !$acc update device (ZFFT(:,IFIRST:ILAST,:))
       CALL EPRFI1B(ZFFT(:,IFIRST:ILAST,:),PSPSC2(:,:),NF_SC2)
+      !$acc update device (ZFFT(:,IFIRST:ILAST,:))
     ENDIF
     IF(PRESENT(PSPSC3A) .AND. NF_SC3A > 0) THEN
       IDIM1=NF_SC3A
@@ -154,8 +154,8 @@ IF(KF_SCALARS > 0)THEN
       DO J3=1,IDIM3
         IFIRST = ILAST+1
         ILAST  = IFIRST-1+2*IDIM1
-        !$acc update device (ZFFT(:,IFIRST:ILAST,:))
         CALL EPRFI1B(ZFFT(:,IFIRST:ILAST,:),PSPSC3A(:,:,J3),IDIM1)
+        !$acc update device (ZFFT(:,IFIRST:ILAST,:))
       ENDDO
     ENDIF
     IF(PRESENT(PSPSC3B) .AND. NF_SC3B > 0) THEN
@@ -164,8 +164,8 @@ IF(KF_SCALARS > 0)THEN
       DO J3=1,IDIM3
         IFIRST = ILAST+1
         ILAST  = IFIRST-1+2*IDIM1
-        !$acc update device (ZFFT(:,IFIRST:ILAST,:))
         CALL EPRFI1B(ZFFT(:,IFIRST:ILAST,:),PSPSC3B(:,:,J3),IDIM1)
+        !$acc update device (ZFFT(:,IFIRST:ILAST,:))
       ENDDO
     ENDIF
   ENDIF

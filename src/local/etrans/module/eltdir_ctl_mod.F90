@@ -78,8 +78,7 @@ ELSE
 !$acc enter data create (FOUBUF)
 ENDIF
 
-!$acc update host(FOUBUF_IN) async(1)
-!$acc wait(1)
+!$acc update host(FOUBUF_IN) 
 
 CALL GSTATS(153,0)
 CALL TRLTOM(FOUBUF_IN,FOUBUF,2*KF_FS)
