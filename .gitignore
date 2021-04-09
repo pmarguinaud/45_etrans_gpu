@@ -30,3 +30,6 @@ src/unsxref
 fort.0
 *.fa
 *.grb
+ics_*
+*.lst
+*.swp
