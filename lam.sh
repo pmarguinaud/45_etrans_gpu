@@ -10,9 +10,11 @@ module unload gnu
 module load nvhpc/20.9
 
 
-mpirun -np 4 ./bin/AATESTPROGDER \
-  --namelist fort.4.100x100 \
-  --time 1 > AATESTPROG.eo 2>&1
+mpirun -np 2 ./bin/AATESTPROGUV --no-write \
+  --namelist fort.4.1000x1000 \
+  --time 10 # > AATESTPROG.eo 2>&1
+
+exit
 
 for f in *.fa
 do
