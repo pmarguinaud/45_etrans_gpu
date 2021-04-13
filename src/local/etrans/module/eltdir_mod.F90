@@ -152,7 +152,7 @@ ENDIF
 ZFFT => ZFFT_PERM (:,:,1:KLED2)
 ZVODI => ZVODI_PERM (:,:,1:MAX(4*KF_UV,1))
 
-!$acc kernels
+!$acc kernels present (ZVODI, ZFFT)
 ZVODI = 0._JPRB
 ZFFT = 0._JPRB
 !$acc end kernels

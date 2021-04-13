@@ -133,7 +133,7 @@ ENDIF
 
 ZFFT => ZFFT_PERM (:,:,1:KLEI2)
 
-!$acc kernels
+!$acc kernels present (ZFFT)
 ZFFT = 0.0_JPRB
 !$acc end kernels
 
@@ -147,9 +147,9 @@ IF (KF_UV > 0) THEN
   IVL   = 6*KF_UV+1
   IVU   = 8*KF_UV
   CALL EPRFI1B(ZFFT(:,:,IVORL:IVORU),PSPVOR,KF_UV,KFLDPTRUV)
-  !!$acc update device (ZFFT(:,:,IVORL:IVORU))
+  !$acc update device (ZFFT(:,:,IVORL:IVORU))
   CALL EPRFI1B(ZFFT(:,:,IDIVL:IDIVU),PSPDIV,KF_UV,KFLDPTRUV)
-  !!$acc update device (ZFFT(:,:,IDIVL:IDIVU))
+  !$acc update device (ZFFT(:,:,IDIVL:IDIVU))
   ILAST = ILAST+4*KF_UV
   CALL EVDTUV(KF_UV,KFLDPTRUV,ZFFT(:,:,IVORL:IVORU),ZFFT(:,:,IDIVL:IDIVU),&
    & ZFFT(:,:,IUL:IUU),ZFFT(:,:,IVL:IVU),PSPMEANU,PSPMEANV)
@@ -160,13 +160,13 @@ IF(KF_SCALARS > 0)THEN
     IFIRST = ILAST+1
     ILAST  = IFIRST - 1 + 2*KF_SCALARS
     CALL EPRFI1B(ZFFT(:,:,IFIRST:ILAST),PSPSCALAR(:,:),KF_SCALARS,KFLDPTRSC)
-    !!$acc update device (ZFFT(:,:,IFIRST:ILAST))
+    !$acc update device (ZFFT(:,:,IFIRST:ILAST))
   ELSE
     IF(PRESENT(PSPSC2) .AND. NF_SC2 > 0) THEN
       IFIRST = ILAST+1
       ILAST  = IFIRST-1+2*NF_SC2
       CALL EPRFI1B(ZFFT(:,:,IFIRST:ILAST),PSPSC2(:,:),NF_SC2)
-      !!$acc update device (ZFFT(:,:,IFIRST:ILAST))
+      !$acc update device (ZFFT(:,:,IFIRST:ILAST))
     ENDIF
     IF(PRESENT(PSPSC3A) .AND. NF_SC3A > 0) THEN
       IDIM1=NF_SC3A
@@ -175,7 +175,7 @@ IF(KF_SCALARS > 0)THEN
         IFIRST = ILAST+1
         ILAST  = IFIRST-1+2*IDIM1
         CALL EPRFI1B(ZFFT(:,:,IFIRST:ILAST),PSPSC3A(:,:,J3),IDIM1)
-        !!$acc update device (ZFFT(:,:,IFIRST:ILAST))
+        !$acc update device (ZFFT(:,:,IFIRST:ILAST))
       ENDDO
     ENDIF
     IF(PRESENT(PSPSC3B) .AND. NF_SC3B > 0) THEN
@@ -185,7 +185,7 @@ IF(KF_SCALARS > 0)THEN
         IFIRST = ILAST+1
         ILAST  = IFIRST-1+2*IDIM1
         CALL EPRFI1B(ZFFT(:,:,IFIRST:ILAST),PSPSC3B(:,:,J3),IDIM1)
-        !!$acc update device (ZFFT(:,:,IFIRST:ILAST))
+        !$acc update device (ZFFT(:,:,IFIRST:ILAST))
       ENDDO
     ENDIF
   ENDIF
