@@ -10,7 +10,8 @@ module unload gnu
 module load nvhpc/20.9
 
 
-mpirun -np 2 ./bin/AATESTPROG --no-write --alloperm \
+#--alloperm \
+mpirun -np 2 ./bin/AATESTPROG --no-write \
   --namelist fort.4.1000x1000 \
   --time 10 # > AATESTPROG.eo 2>&1
 
