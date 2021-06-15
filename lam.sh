@@ -14,10 +14,12 @@ if [ 0 -eq 1 ]
 then
 
 export DR_HOOK_NOT_MPI=1
-gdb --args ./bin/AATESTPROG --no-write \
-  --namelist fort.4.20x20 --lmpoff \
-  --time 10 # > AATESTPROG.eo 2>&1
+export PGI_ACC_DEBUG=1
+mpirun -np 1 ./bin/AATESTPROG --no-write \
+  --namelist fort.4.100x100 \
+  --time 10 --check # > AATESTPROG.eo 2>&1
 
+exit
 
 fi
 
