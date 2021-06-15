@@ -272,10 +272,9 @@ ENDIF
 CALL GSTATS(157,0)
 JF_FS=KF_FS-D%IADJUST_I
 #ifdef USE_CUDA_AWARE_MPI_EFTINV
-!$acc data create (PGP) if (present (PGP))
+!$acc data copyout (PGP) if (present (PGP))
 CALL TRLTOG_CUDAAWARE(ZGTF,JF_FS,KF_GP,KF_SCALARS_G,IVSET,KPTRGP,&
  &PGP,PGPUV,PGP3A,PGP3B,PGP2,LDGW=.TRUE.)
-!$acc update host (PGP) if (present (PGP))
 !$acc end data
 #else
 CALL TRLTOG(ZGTF,JF_FS,KF_GP,KF_SCALARS_G,IVSET,KPTRGP,&
