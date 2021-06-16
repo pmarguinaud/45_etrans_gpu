@@ -1247,6 +1247,7 @@ WRITE (*, *) PGLAT (1, 2)
    !!$ACC data if(present(PGP3a)) copyin(PGP3a)
    !!$ACC data if(present(PGP3b)) copyin(PGP3b)
    !!$ACC data if(present(PGP))   copyin(PGP)
+
   DO JBLK=1,NGPBLKS
       IFIRST = IGPTRSEND(1,JBLK,MYSETW)
       IF(IFIRST > 0) THEN
