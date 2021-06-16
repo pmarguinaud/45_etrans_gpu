@@ -10,8 +10,8 @@ module unload gnu
 module load nvhpc/20.9
 
 
-mpirun -np 1 ./bin/AATESTPROGDER \
-  --namelist fort.4.20x20 \
+mpirun -np 2 ./bin/AATESTPROGDER \
+  --namelist fort.4.100x100 \
   --time 1 
 
 IP=86.201.29.85
