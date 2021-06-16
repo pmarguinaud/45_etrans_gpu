@@ -424,7 +424,7 @@ WRITE (*, *) PGLAT (1, 2)
    !$ACC present(PGLAT) &
    !$ACC copyin(IGPTRSEND) &
    !$ACC create (IFLDOFF,IGPTROFF) &
-   !$ACC copyin(INDOFF,KINDEX)
+   !$ACC copyin(INDOFF,KINDEX,LLUV)
    !$ACC data if(present(PGP))   present(PGP)
    !$ACC data if(present(PGPUV)) present(PGPUV)
    !$ACC data if(present(PGP2))  present(PGP2)
