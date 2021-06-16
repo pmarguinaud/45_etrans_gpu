@@ -170,7 +170,11 @@ CALL TRGTOL(ZGTF,KF_FS,KF_GP,KF_SCALARS_G,IVSET,KPTRGP,&
  &PGP,PGPUV,PGP3A,PGP3B,PGP2,LDGW=.TRUE.)
 #endif
 
+!$acc serial
+WRITE (*, *) ZGTF (1, 2)
+!$acc end serial
 
+#ifdef UNDEF
 BLOCK
 INTEGER :: JJ, JFLD
 !$acc serial
@@ -182,6 +186,7 @@ ENDDO
 ENDDO
 !$acc end serial
 ENDBLOCK
+#endif
 
 CALL GSTATS(158,1)
 CALL GSTATS(106,0)
