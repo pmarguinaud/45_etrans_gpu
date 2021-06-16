@@ -7,7 +7,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 
 !USE TPM_DIM
 USE TPM_DISTR
-USE TPMALD_DISTR    ,ONLY : DALD
+USE TPMALD_DISTR    ,ONLY : DALD, DALD_NESM0, DALD_NCPL2M
 !
 !**** *PRFI1* - Prepare spectral fields for inverse Legendre transform
 
@@ -60,7 +60,7 @@ REAL(KIND=JPRB)   ,INTENT(OUT)  :: PFFT(:,:,:)
 INTEGER(KIND=JPIM),INTENT(IN),OPTIONAL :: KFLDPTR(:)
 
 INTEGER(KIND=JPIM) :: II, INM, IR, J, JFLD, ILCM, IOFF,IFLD
-INTEGER(KIND=JPIM) :: IM, JM
+INTEGER(KIND=JPIM) :: IM, JM, MAX_NCPL2M
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !     ------------------------------------------------------------------
@@ -70,9 +70,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('EPRFI1B_MOD:EPRFI1B',0,ZHOOK_HANDLE)
 
+!$acc data present (PFFT, PSPEC)
+
+!$acc kernels default(none)
 PFFT = 0._JPRB
+!$acc end kernels
 
 IF(PRESENT(KFLDPTR)) THEN
+  ! TODO 
   DO JFLD=1,KFIELDS
     IR = 2*(JFLD-1)+1
     II = IR+1
@@ -91,23 +96,31 @@ IF(PRESENT(KFLDPTR)) THEN
     ENDDO
   ENDDO
 ELSE
+  MAX_NCPL2M = MAXVAL (DALD_NCPL2M)
+  !$ACC parallel loop collapse(3) &
+  !$ACC& present(D_MYMS,DALD_NCPL2M,DALD_NESM0) &
+  !$ACC& present(PFFT,PSPEC) &
+  !$ACC& private(IR,II,IM,ILCM,IOFF,INM) default(none)
   DO JFLD=1,KFIELDS
-    IR = 2*(JFLD-1)+1
-    II = IR+1
-    DO JM = 1, D%NUMP
-      IM   = D%MYMS(JM)
-      ILCM = DALD%NCPL2M(IM)
-      IOFF = DALD%NESM0(IM)
-      DO J=1,ILCM,2
-        INM = IOFF+(J-1)*2
-        PFFT(J  ,JM,IR) = PSPEC(JFLD,INM  )
-        PFFT(J+1,JM,IR) = PSPEC(JFLD,INM+1)
-        PFFT(J  ,JM,II) = PSPEC(JFLD,INM+2)
-        PFFT(J+1,JM,II) = PSPEC(JFLD,INM+3)
+    DO JM = 1, D_NUMP
+      DO J=1,MAX_NCPL2M,2
+       IR = 2*(JFLD-1)+1
+       II = IR+1
+       IM   = D_MYMS(JM)
+       ILCM = DALD_NCPL2M(IM)
+       if (J > ILCM) CYCLE
+       IOFF = DALD_NESM0(IM)
+       INM = IOFF+(J-1)*2
+       PFFT(J  ,JM,IR) = PSPEC(JFLD,INM  )
+       PFFT(J+1,JM,IR) = PSPEC(JFLD,INM+1)
+       PFFT(J  ,JM,II) = PSPEC(JFLD,INM+2)
+       PFFT(J+1,JM,II) = PSPEC(JFLD,INM+3)
       ENDDO
     ENDDO
   ENDDO
 ENDIF
+
+!$acc end data
 
 
 IF (LHOOK) CALL DR_HOOK('EPRFI1B_MOD:EPRFI1B',1,ZHOOK_HANDLE)

@@ -592,8 +592,8 @@ CALL GSTATS(1807,1)
 !     ------------------------------------------------------------------
 
 !TODO add all the other copyin/copyout
-!#ACC data copyin(PSPSCALAR) if (present (PSPSCALAR))
-!$ACC data copyout(PGP) if (present (PGP))
+!$ACC data copyin (PSPSCALAR) if (present (PSPSCALAR))
+!$ACC data copyout (PGP) if (present (PGP))
 ! Perform transform
 CALL EINV_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_OUT_LT,&
  & IF_UV,IF_SCALARS,IF_SCDERS,&
@@ -601,7 +601,7 @@ CALL EINV_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_OUT_LT,&
  & PSPSC3A,PSPSC3B,PSPSC2,KVSETSC3A,KVSETSC3B,KVSETSC2,PGPUV,PGP3A,PGP3B,PGP2,&
  & PMEANU,PMEANV )
 !$ACC end data
-!#ACC end data
+!$ACC end data
 
 IF (LHOOK) CALL DR_HOOK('EINV_TRANS',1,ZHOOK_HANDLE)
 
