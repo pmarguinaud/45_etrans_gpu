@@ -413,17 +413,16 @@ MODULE TRLTOG_MOD
   
   CALL GSTATS(1806,1)
 
-  !$ACC data if(present(PGP))   present(PGP)
-  !$ACC data present(PGLAT)
-
-  !$ACC data copyin(IGPTRSEND,INDOFF,INDEX,JSEND,ISENDTOT) &
+  !$ACC data present(PGLAT) &
+  !$ACC      copyin(IGPTRSEND,INDOFF,INDEX,JSEND,ISENDTOT) &
   !$ACC      copyin(KPTRGP,LLGP3B,LLGP3A,LLGP2,LLUV) &
   !$ACC      create(IFLDOFF,IGPTROFF)
 
-  !$ACC data if(present(PGPUV)) copyout(PGPUV) copyin(IUVLEVS,IUVPARS)
-  !$ACC data if(present(PGP2))  copyout(PGP2)  copyin(IGP2PARS)
-  !$ACC data if(present(PGP3A)) copyout(PGP3A) copyin(IGP3ALEVS,IGP3APARS)
-  !$ACC data if(present(PGP3B)) copyout(PGP3B) copyin(IGP3BLEVS,IGP3BPARS)
+  !$ACC data if(present(PGP))   present(PGP)
+  !$ACC data if(present(PGPUV)) present(PGPUV) copyin(IUVLEVS,IUVPARS)
+  !$ACC data if(present(PGP2))  present(PGP2)  copyin(IGP2PARS)
+  !$ACC data if(present(PGP3A)) present(PGP3A) copyin(IGP3ALEVS,IGP3APARS)
+  !$ACC data if(present(PGP3B)) present(PGP3B) copyin(IGP3BLEVS,IGP3BPARS)
   
   ! Copy local contribution
   IF( IRECVTOT(MYPROC) > 0 )THEN
@@ -740,7 +739,6 @@ MODULE TRLTOG_MOD
     !IF(MPL_MYRANK==1) WRITE(*,*) "unpacking (trltog) in sec: ", Tc
   #endif
 
-  !$ACC end data
   !$ACC end data
   !$ACC end data
   !$ACC end data

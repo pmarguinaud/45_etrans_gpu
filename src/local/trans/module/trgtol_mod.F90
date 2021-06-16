@@ -416,16 +416,16 @@ MODULE TRGTOL_MOD
   
   ! Send loop.............................................................
   
-   !$ACC data &
-   !$ACC present(PGLAT) &
-   !$ACC copyin(IGPTRSEND) &
-   !$ACC create (IFLDOFF,IGPTROFF) &
-   !$ACC copyin(INDOFF,KINDEX,LLUV,IUVLEVS,IUVPARS,IGP2PARS,IGP3ALEVS,IGP3APARS,IGP3BLEVS,IGP3BPARS)
-   !$ACC data if(present(PGP))   present(PGP)
-   !$ACC data if(present(PGPUV)) present(PGPUV)
-   !$ACC data if(present(PGP2))  present(PGP2)
-   !$ACC data if(present(PGP3A)) present(PGP3A)
-   !$ACC data if(present(PGP3B)) present(PGP3B)
+   !$ACC data present(PGLAT) &
+   !$ACC      copyin(IGPTRSEND,INDOFF,KINDEX) &
+   !$ACC      copyin(KPTRGP,LLGP3B,LLGP3A,LLGP2,LLUV) &
+   !$ACC      create(IFLDOFF,IGPTROFF) 
+
+   !$ACC data if(present(PGP))   present(PGP)   
+   !$ACC data if(present(PGPUV)) present(PGPUV) copyin(IUVLEVS,IUVPARS)
+   !$ACC data if(present(PGP2))  present(PGP2)  copyin(IGP2PARS)
+   !$ACC data if(present(PGP3A)) present(PGP3A) copyin(IGP3ALEVS,IGP3APARS)
+   !$ACC data if(present(PGP3B)) present(PGP3B) copyin(IGP3BLEVS,IGP3BPARS)
   ! Copy local contribution
   
   IF(ISENDTOT(MYPROC) > 0 )THEN
@@ -451,14 +451,10 @@ MODULE TRGTOL_MOD
         IPOS=IPOS+ILAST-IFIRST+1
       ENDIF
     ENDDO
+    !$ACC update device (IGPTROFF,IFLDOFF)
+
     CALL GSTATS(1601,0)
 
-  #ifdef NECSX
-  !!$OMP PARALLEL DO SCHEDULE(DYNAMIC) PRIVATE(JFLD,JBLK,JK,IFLD,IPOS,IFIRST,ILAST)
-  #else
-  !!$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JFLD,JBLK,JK,IFLD,IPOS,IFIRST,ILAST)
-  #endif
-  !$ACC update device (IGPTROFF,IFLDOFF)
     DO JBLK=1,NGPBLKS
       IFIRST = IGPTRSEND(1,JBLK,MYSETW)
       IF(IFIRST > 0) THEN
