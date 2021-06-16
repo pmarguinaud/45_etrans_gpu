@@ -571,9 +571,9 @@ MODULE TRGTOL_MOD
       ENDDO
   
   
-      IF(.not. LLPGPONLY) THEN
-         stop("Error: only LLPGPONLY is supported on GPU as yet")
-      END IF
+!     IF(.not. LLPGPONLY) THEN
+!        stop("Error: only LLPGPONLY is supported on GPU as yet")
+!     END IF
   
   
   
