@@ -160,10 +160,6 @@ MODULE TRGTOL_MOD
   LLGW = .FALSE.
   IF (PRESENT (LDGW)) LLGW = LDGW
   
-!$acc serial
-WRITE (*, *) PGLAT (1, 2)
-!$acc end serial
-
   CALL GSTATS(1805,0)
   
   LLINDER = .FALSE.
@@ -484,7 +480,7 @@ WRITE (*, *) PGLAT (1, 2)
           DO JFLD=1,IFLDS
             IFLD = IFLDOFF(JFLD)
             IF(LLUV(IFLD)) THEN
-              !$ACC parallel loop private (IPOS)
+              !$ACC parallel loop private (IPOS) default (none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -494,7 +490,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP2(IFLD)) THEN
-              !$ACC parallel loop private (IPOS)
+              !$ACC parallel loop private (IPOS) default (none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -504,7 +500,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
-              !$ACC parallel loop private (IPOS)
+              !$ACC parallel loop private (IPOS) default (none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -514,7 +510,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
-              !$ACC parallel loop private (IPOS)
+              !$ACC parallel loop private (IPOS) default (none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -536,9 +532,6 @@ WRITE (*, *) PGLAT (1, 2)
     CALL GSTATS(1601,1)
   
   ENDIF
-!$acc serial
-WRITE (*, *) PGLAT (1, 2)
-!$acc end serial
   
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
@@ -779,10 +772,6 @@ WRITE (*, *) PGLAT (1, 2)
     ENDDO
     !$acc end data
   
-!$acc serial
-WRITE (*, *) PGLAT (1, 2)
-!$acc end serial
-
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
     Tc=(TIMEF()-Tc)/1000.0_JPRBT
@@ -946,9 +935,6 @@ WRITE (*, *) PGLAT (1, 2)
 
   LLGW = .FALSE.
   IF (PRESENT (LDGW)) LLGW = LDGW
-  
-
-WRITE (*, *) PGLAT (1, 2)
 
   iunit=300+myproc
 
@@ -1338,8 +1324,6 @@ WRITE (*, *) PGLAT (1, 2)
   ENDIF
   !!!!$ACC update device(PGLAT)
 
-WRITE (*, *) PGLAT (1, 2)
-
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
     Tc=TIMEF()
@@ -1521,8 +1505,6 @@ WRITE (*, *) PGLAT (1, 2)
       ENDDO
   ENDDO
   !$OMP END PARALLEL DO
-
-WRITE (*, *) PGLAT (1, 2)
 
   !!$ACC end data
 

@@ -473,7 +473,7 @@ MODULE TRLTOG_MOD
           DO JFLD=1,IFLDS
             IFLD = IFLDOFF(JFLD)
             IF(LLUV(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
+              !$ACC parallel loop private (IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -483,7 +483,7 @@ MODULE TRLTOG_MOD
                 ENDIF
               ENDDO
             ELSEIF(LLGP2(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
+              !$ACC parallel loop private (IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -493,7 +493,7 @@ MODULE TRLTOG_MOD
                 ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
+              !$ACC parallel loop private (IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -503,7 +503,7 @@ MODULE TRLTOG_MOD
                 ENDIF
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
+              !$ACC parallel loop private (IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
