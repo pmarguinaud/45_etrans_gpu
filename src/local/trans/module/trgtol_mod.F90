@@ -484,7 +484,7 @@ WRITE (*, *) PGLAT (1, 2)
           DO JFLD=1,IFLDS
             IFLD = IFLDOFF(JFLD)
             IF(LLUV(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
+              !$ACC parallel loop private (IPOS)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -494,7 +494,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP2(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
+              !$ACC parallel loop private (IPOS)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -504,7 +504,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
+              !$ACC parallel loop private (IPOS)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
@@ -514,7 +514,7 @@ WRITE (*, *) PGLAT (1, 2)
                 ENDIF
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
-              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
+              !$ACC parallel loop private (IPOS)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
                 IF (LLGW) THEN
