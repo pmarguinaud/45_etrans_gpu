@@ -532,6 +532,9 @@ MODULE TRGTOL_MOD
     CALL GSTATS(1601,1)
   
   ENDIF
+!$acc serial
+WRITE (*, *) PGLAT (1, 2)
+!$acc end serial
   
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
@@ -772,6 +775,10 @@ MODULE TRGTOL_MOD
     ENDDO
     !$acc end data
   
+!$acc serial
+WRITE (*, *) PGLAT (1, 2)
+!$acc end serial
+
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
     Tc=(TIMEF()-Tc)/1000.0_JPRBT
@@ -1323,6 +1330,8 @@ MODULE TRGTOL_MOD
   ENDIF
   !!!!$ACC update device(PGLAT)
 
+WRITE (*, *) PGLAT (1, 2)
+
   #ifdef COMVERBOSE
     call MPI_BARRIER(MPI_COMM_WORLD,IERROR)
     Tc=TIMEF()
@@ -1504,6 +1513,8 @@ MODULE TRGTOL_MOD
       ENDDO
   ENDDO
   !$OMP END PARALLEL DO
+
+WRITE (*, *) PGLAT (1, 2)
 
   !!$ACC end data
 
