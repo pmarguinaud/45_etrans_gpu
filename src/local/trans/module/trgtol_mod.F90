@@ -420,7 +420,7 @@ MODULE TRGTOL_MOD
    !$ACC present(PGLAT) &
    !$ACC copyin(IGPTRSEND) &
    !$ACC create (IFLDOFF,IGPTROFF) &
-   !$ACC copyin(INDOFF,KINDEX,LLUV)
+   !$ACC copyin(INDOFF,KINDEX,LLUV,IUVLEVS,IUVPARS,IGP2PARS,IGP3ALEVS,IGP3APARS,IGP3BLEVS,IGP3BPARS)
    !$ACC data if(present(PGP))   present(PGP)
    !$ACC data if(present(PGPUV)) present(PGPUV)
    !$ACC data if(present(PGP2))  present(PGP2)
