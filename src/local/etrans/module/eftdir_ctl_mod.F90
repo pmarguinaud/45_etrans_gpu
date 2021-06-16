@@ -175,7 +175,7 @@ BLOCK
 INTEGER :: JJ
 !$acc serial
 DO JJ = 1, SIZE (ZGTF, 1)
-WRITE (*, *) JJ, ZGTF (:, 1)
+WRITE (*, *) JJ, ZGTF (JJ, 1)
 ENDDO
 !$acc end serial
 ENDBLOCK
