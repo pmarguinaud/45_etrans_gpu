@@ -88,6 +88,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.1      VORTICITY AND DIVERGENCE.
 
 IF (LHOOK) CALL DR_HOOK('EUPDSP_MOD:EUPDSP',0,ZHOOK_HANDLE)
+
+! TODO : all other arguments should be marked as present
+!$ACC data present(PFFA)
+!$ACC data present(PSPSCALAR) if (present (PSPSCALAR))
+
 IST = 1
 IF (KF_UV > 0) THEN
   IST = IST+4*KF_UV
@@ -95,9 +100,7 @@ IF (KF_UV > 0) THEN
   IVORE = 2*KF_UV
   IDIVS = 2*KF_UV+1
   IDIVE = 4*KF_UV
-  !$acc update host (PVODI(:,:,IVORS:IVORE))
   CALL EUPDSPB(KF_UV,PVODI(:,:,IVORS:IVORE),PSPVOR,KFLDPTRUV)
-  !$acc update host (PVODI(:,:,IDIVS:IDIVE))
   CALL EUPDSPB(KF_UV,PVODI(:,:,IDIVS:IDIVE),PSPDIV,KFLDPTRUV)
 ENDIF
 
@@ -106,13 +109,11 @@ ENDIF
 IF (KF_SCALARS > 0) THEN
   IF(PRESENT(PSPSCALAR)) THEN
     IEND = IST+2*KF_SCALARS-1
-    !$acc update host (PFFA(:,:,IST:IEND))
     CALL EUPDSPB(KF_SCALARS,PFFA(:,:,IST:IEND),PSPSCALAR,KFLDPTRSC)
   ELSE
     IF(PRESENT(PSPSC2) .AND. NF_SC2 > 0) THEN
       IDIM1 = NF_SC2
       IEND  = IST+2*IDIM1-1
-      !$acc update host (PFFA(:,:,IST:IEND))
       CALL EUPDSPB(IDIM1,PFFA(:,:,IST:IEND),PSPSC2)
       IST=IST+2*IDIM1
     ENDIF
@@ -121,7 +122,6 @@ IF (KF_SCALARS > 0) THEN
       IDIM3=UBOUND(PSPSC3A,3)
       DO J3=1,IDIM3
         IEND = IST+2*IDIM1-1
-        !$acc update host (PFFA(:,:,IST:IEND))
         CALL EUPDSPB(IDIM1,PFFA(:,:,IST:IEND),PSPSC3A(:,:,J3))
         IST=IST+2*IDIM1
       ENDDO
@@ -131,13 +131,16 @@ IF (KF_SCALARS > 0) THEN
       IDIM3=UBOUND(PSPSC3B,3)
       DO J3=1,IDIM3
         IEND = IST+2*IDIM1-1
-        !$acc update host (PFFA(:,:,IST:IEND))
         CALL EUPDSPB(IDIM1,PFFA(:,:,IST:IEND),PSPSC3B(:,:,J3))
         IST=IST+2*IDIM1
       ENDDO
     ENDIF
   ENDIF
 ENDIF
+
+!$ACC end data
+!$ACC end data
+
 IF (LHOOK) CALL DR_HOOK('EUPDSP_MOD:EUPDSP',1,ZHOOK_HANDLE)
 
 !     ------------------------------------------------------------------
