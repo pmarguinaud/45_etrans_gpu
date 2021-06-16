@@ -424,8 +424,8 @@ MODULE TRGTOL_MOD
    !$ACC data if(present(PGP))   present(PGP)
    !$ACC data if(present(PGPUV)) present(PGPUV)
    !$ACC data if(present(PGP2))  present(PGP2)
-   !$ACC data if(present(PGP3a)) present(PGP3a)
-   !$ACC data if(present(PGP3b)) present(PGP3b)
+   !$ACC data if(present(PGP3A)) present(PGP3A)
+   !$ACC data if(present(PGP3B)) present(PGP3B)
   ! Copy local contribution
   
   IF(ISENDTOT(MYPROC) > 0 )THEN
@@ -464,7 +464,7 @@ MODULE TRGTOL_MOD
       IF(IFIRST > 0) THEN
         ILAST = IGPTRSEND(2,JBLK,MYSETW)
         IF(LLPGPONLY) THEN
-          !$ACC parallel loop tile(16,32) 
+          !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
           DO JK=IFIRST,ILAST
             DO JFLD=1,IFLDS             
                IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
@@ -480,28 +480,44 @@ MODULE TRGTOL_MOD
           DO JFLD=1,IFLDS
             IFLD = IFLDOFF(JFLD)
             IF(LLUV(IFLD)) THEN
-              !$acc parallel loop private(ipos)
+              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK)
+                ENDIF
               ENDDO
             ELSEIF(LLGP2(IFLD)) THEN
-              !$acc parallel loop private(ipos)
+              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP2(JK,IGP2PARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP2(JK,IGP2PARS(IFLD),JBLK) 
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP2(JK,IGP2PARS(IFLD),JBLK) 
+                ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
-              !$acc parallel loop private(ipos)
+              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)
+                ENDIF
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
-              !$acc parallel loop private(ipos)
+              !$ACC parallel loop tile(16,32) private (IPOS,IFLD)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGLAT(JFLD,KINDEX(IPOS)) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                IF (LLGW) THEN
+                  PGLAT(KINDEX(IPOS),JFLD) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                ELSE
+                  PGLAT(JFLD,KINDEX(IPOS)) = PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)
+                ENDIF
               ENDDO
             ELSE
               WRITE(NOUT,*)'TRLTOG_MOD: ERROR',JFLD,IFLD
@@ -643,7 +659,6 @@ MODULE TRGTOL_MOD
   ELSE
     CALL GSTATS(804,0)
   ENDIF
-  IR=0
   
   #ifdef AGVERBOSE
   T2=TIMEF()
@@ -662,6 +677,8 @@ MODULE TRGTOL_MOD
   
   !$acc host_data use_device(ZCOMBUFR,ZCOMBUFS)
   
+  IR=0
+
   !  Receive loop.........................................................
   DO INR=1,INRECV
     IR=IR+1
@@ -717,9 +734,6 @@ MODULE TRGTOL_MOD
   
   !$acc exit data delete(ZCOMBUFS)
   
-  
-  
-  
   IF(.NOT.LGPNORM)THEN
     CALL GSTATS(803,1)
   ELSE
@@ -774,6 +788,7 @@ MODULE TRGTOL_MOD
   IF (LHOOK) CALL DR_HOOK('TRGTOL',1,ZHOOK_HANDLE)
   
   END SUBROUTINE TRGTOL_CUDAAWARE
+
   SUBROUTINE TRGTOL(PGLAT,KF_FS,KF_GP,KF_SCALARS_G,KVSET,KPTRGP,&
    &PGP,PGPUV,PGP3A,PGP3B,PGP2,LDGW)
   

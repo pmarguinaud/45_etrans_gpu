@@ -62,13 +62,14 @@ INTEGER(KIND=JPIM),INTENT(IN),OPTIONAL :: KFLDPTR(:)
 INTEGER(KIND=JPIM) :: II, INM, IR, JFLD, JN,IFLD, JM, IM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
-!$ACC data present(POA,PSPEC)
 
 !     ------------------------------------------------------------------
 
 !*       1.    UPDATE SPECTRAL FIELDS.
 !              -----------------------
 IF (LHOOK) CALL DR_HOOK('EUPDSPB_MOD:EUPDSPB',0,ZHOOK_HANDLE)
+
+!$ACC data present (POA, PSPEC)
 
 IF(PRESENT(KFLDPTR)) THEN
   
@@ -114,6 +115,7 @@ ELSE
   ENDDO
 
 ENDIF
+
 !$ACC end data
 
 IF (LHOOK) CALL DR_HOOK('EUPDSPB_MOD:EUPDSPB',1,ZHOOK_HANDLE)

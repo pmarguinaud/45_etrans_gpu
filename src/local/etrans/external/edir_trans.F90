@@ -488,17 +488,34 @@ CALL GSTATS(1808,1)
 
 !     ------------------------------------------------------------------
 
-! TODO : Add all other copyin/copyout
 #ifdef USE_CUDA_AWARE_MPI_EFTDIR
-!$ACC data copyin (PGP) if (present (PGP))
+!$ACC data copyin (PGP  ) if (present (PGP  ))
+!$ACC data copyin (PGPUV) if (present (PGPUV))
+!$ACC data copyin (PGP3A) if (present (PGP3A))
+!$ACC data copyin (PGP3B) if (present (PGP3B))
+!$ACC data copyin (PGP2 ) if (present (PGP2 ))
 #endif
+!$ACC data copyout (PSPVOR   ) if (present (PSPVOR   ))
+!$ACC data copyout (PSPDIV   ) if (present (PSPDIV   ))
 !$ACC data copyout (PSPSCALAR) if (present (PSPSCALAR))
+!$ACC data copyout (PSPSC3A  ) if (present (PSPSC3A  ))
+!$ACC data copyout (PSPSC3B  ) if (present (PSPSC3B  ))
+!$ACC data copyout (PSPSC2   ) if (present (PSPSC2   ))
 CALL EDIR_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_UV,IF_SCALARS,&
  & PSPVOR,PSPDIV,PSPSCALAR,KVSETUV,KVSETSC,PGP,&
  & PSPSC3A,PSPSC3B,PSPSC2,KVSETSC3A,KVSETSC3B,KVSETSC2,PGPUV,PGP3A,PGP3B,PGP2,&
  & PMEANU,PMEANV,AUX_PROC)
 !$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
 #ifdef USE_CUDA_AWARE_MPI_EFTDIR
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
 !$ACC end data
 #endif
 

@@ -591,10 +591,19 @@ CALL GSTATS(1807,1)
 
 !     ------------------------------------------------------------------
 
-!TODO add all the other copyin/copyout
+
+!$ACC data copyin (PSPVOR   ) if (present (PSPVOR   ))
+!$ACC data copyin (PSPDIV   ) if (present (PSPDIV   ))
 !$ACC data copyin (PSPSCALAR) if (present (PSPSCALAR))
+!$ACC data copyin (PSPSC3A  ) if (present (PSPSC3A  ))
+!$ACC data copyin (PSPSC3B  ) if (present (PSPSC3B  ))
+!$ACC data copyin (PSPSC2   ) if (present (PSPSC2   ))
 #ifdef USE_CUDA_AWARE_MPI_EFTINV
-!$ACC data copyout (PGP) if (present (PGP))
+!$ACC data copyout (PGP  ) if (present (PGP  ))
+!$ACC data copyout (PGPUV) if (present (PGPUV))
+!$ACC data copyout (PGP3A) if (present (PGP3A))
+!$ACC data copyout (PGP3B) if (present (PGP3B))
+!$ACC data copyout (PGP2 ) if (present (PGP2 ))
 #endif
 ! Perform transform
 CALL EINV_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_OUT_LT,&
@@ -604,7 +613,16 @@ CALL EINV_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_OUT_LT,&
  & PMEANU,PMEANV )
 #ifdef USE_CUDA_AWARE_MPI_EFTINV
 !$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
 #endif
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
+!$ACC end data
 !$ACC end data
 
 IF (LHOOK) CALL DR_HOOK('EINV_TRANS',1,ZHOOK_HANDLE)

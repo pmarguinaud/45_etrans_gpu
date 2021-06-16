@@ -89,10 +89,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('EUPDSP_MOD:EUPDSP',0,ZHOOK_HANDLE)
 
-! TODO : all other arguments should be marked as present
-!$ACC data present(PFFA)
-!$ACC data present(PSPSCALAR) if (present (PSPSCALAR))
-
 IST = 1
 IF (KF_UV > 0) THEN
   IST = IST+4*KF_UV
@@ -137,9 +133,6 @@ IF (KF_SCALARS > 0) THEN
     ENDIF
   ENDIF
 ENDIF
-
-!$ACC end data
-!$ACC end data
 
 IF (LHOOK) CALL DR_HOOK('EUPDSP_MOD:EUPDSP',1,ZHOOK_HANDLE)
 

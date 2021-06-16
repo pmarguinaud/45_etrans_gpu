@@ -422,8 +422,8 @@ MODULE TRLTOG_MOD
 
   !$ACC data if(present(PGPUV)) copyout(PGPUV) copyin(IUVLEVS,IUVPARS)
   !$ACC data if(present(PGP2))  copyout(PGP2)  copyin(IGP2PARS)
-  !$ACC data if(present(PGP3a)) copyout(PGP3a) copyin(IGP3ALEVS,IGP3APARS)
-  !$ACC data if(present(PGP3b)) copyout(PGP3b) copyin(IGP3BLEVS,IGP3BPARS)
+  !$ACC data if(present(PGP3A)) copyout(PGP3A) copyin(IGP3ALEVS,IGP3APARS)
+  !$ACC data if(present(PGP3B)) copyout(PGP3B) copyin(IGP3BLEVS,IGP3BPARS)
   
   ! Copy local contribution
   IF( IRECVTOT(MYPROC) > 0 )THEN
@@ -457,7 +457,7 @@ MODULE TRLTOG_MOD
       IF(IFIRST > 0) THEN
         ILAST = IGPTRSEND(2,JBLK,MYSETW)
         IF(LLPGPONLY) THEN
-          !$ACC parallel loop tile(16,32) default(none)
+          !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
           DO JFLD=1,IFLDS
             DO JK=IFIRST,ILAST
                IFLD = IFLDOFF(JFLD)
@@ -473,28 +473,44 @@ MODULE TRLTOG_MOD
           DO JFLD=1,IFLDS
             IFLD = IFLDOFF(JFLD)
             IF(LLUV(IFLD)) THEN
-              !$ACC parallel loop private(ipos) default(none)
+              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK) = PGLAT(JFLD,INDEX(IPOS))
+                IF (LLGW) THEN
+                  PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK) = PGLAT(INDEX(IPOS),JFLD)
+                ELSE
+                  PGPUV(JK,IUVLEVS(IFLD),IUVPARS(IFLD),JBLK) = PGLAT(JFLD,INDEX(IPOS))
+                ENDIF
               ENDDO
             ELSEIF(LLGP2(IFLD)) THEN
-              !$ACC parallel loop private(ipos) default(none)
+              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGP2(JK,IGP2PARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                IF (LLGW) THEN
+                  PGP2(JK,IGP2PARS(IFLD),JBLK)=PGLAT(INDEX(IPOS),JFLD)
+                ELSE
+                  PGP2(JK,IGP2PARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                ENDIF
               ENDDO
             ELSEIF(LLGP3A(IFLD)) THEN
-              !$ACC parallel loop private(ipos) default(none)
+              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                IF (LLGW) THEN
+                  PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)=PGLAT(INDEX(IPOS),JFLD)
+                ELSE
+                  PGP3A(JK,IGP3ALEVS(IFLD),IGP3APARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                ENDIF
               ENDDO
             ELSEIF(LLGP3B(IFLD)) THEN
-              !$ACC parallel loop private(ipos) default(none)
+              !$ACC parallel loop tile(16,32) private (IFLD, IPOS) default(none)
               DO JK=IFIRST,ILAST
                 IPOS = INDOFF(MYPROC)+IGPTROFF(JBLK)+JK-IFIRST+1
-                PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                IF (LLGW) THEN
+                  PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)=PGLAT(INDEX(IPOS),JFLD)
+                ELSE
+                  PGP3B(JK,IGP3BLEVS(IFLD),IGP3BPARS(IFLD),JBLK)=PGLAT(JFLD,INDEX(IPOS))
+                ENDIF
               ENDDO
             ELSE
               WRITE(NOUT,*)'TRLTOG_MOD: ERROR',JFLD,IFLD
@@ -550,7 +566,6 @@ MODULE TRLTOG_MOD
   
   CALL GSTATS(1605,1)
   
-  IR=0
   IF (LHOOK) CALL DR_HOOK('TRLTOG_BAR',0,ZHOOK_HANDLE_BAR)
   !CALL GSTATS_BARRIER(762)
   IF (LHOOK) CALL DR_HOOK('TRLTOG_BAR',1,ZHOOK_HANDLE_BAR)
@@ -572,6 +587,9 @@ MODULE TRLTOG_MOD
   
   !$ACC host_data use_device(ZCOMBUFR,ZCOMBUFS)
   !...Receive loop.........................................................
+
+  IR=0
+
   DO INR=1,INRECV
     IR=IR+1
     IRECV=JRECV(INR)
