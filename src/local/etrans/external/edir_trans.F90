@@ -488,10 +488,15 @@ CALL GSTATS(1808,1)
 
 !     ------------------------------------------------------------------
 
+! TODO : Add all other copyin/copyout
+!$ACC data copyin (PGP) if (present (PGP))
+!#ACC data copyout (PSPSCALAR) if (present (PSPSCALAR))
 CALL EDIR_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_UV,IF_SCALARS,&
  & PSPVOR,PSPDIV,PSPSCALAR,KVSETUV,KVSETSC,PGP,&
  & PSPSC3A,PSPSC3B,PSPSC2,KVSETSC3A,KVSETSC3B,KVSETSC2,PGPUV,PGP3A,PGP3B,PGP2,&
  & PMEANU,PMEANV,AUX_PROC)
+!#ACC end data
+!$ACC end data
 IF (LHOOK) CALL DR_HOOK('EDIR_TRANS',1,ZHOOK_HANDLE)
 
 !     ------------------------------------------------------------------
