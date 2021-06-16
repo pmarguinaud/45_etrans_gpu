@@ -672,11 +672,6 @@ MODULE TRLTOG_MOD
       ENDDO
   
   
-!     IF(.not. LLPGPONLY) THEN
-!        stop("Error: only LLPGPONLY is supported on GPU as yet")
-!     END IF
-     
-  
       !$ACC data copyin(IFLDA,JPOS)
    
       !$ACC parallel loop default(none)
