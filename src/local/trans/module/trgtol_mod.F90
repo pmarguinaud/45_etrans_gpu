@@ -160,6 +160,10 @@ MODULE TRGTOL_MOD
   LLGW = .FALSE.
   IF (PRESENT (LDGW)) LLGW = LDGW
   
+!$acc serial
+WRITE (*, *) PGLAT (1, 2)
+!$acc end serial
+
   CALL GSTATS(1805,0)
   
   LLINDER = .FALSE.
@@ -943,6 +947,9 @@ WRITE (*, *) PGLAT (1, 2)
   LLGW = .FALSE.
   IF (PRESENT (LDGW)) LLGW = LDGW
   
+
+WRITE (*, *) PGLAT (1, 2)
+
   iunit=300+myproc
 
   CALL GSTATS(1805,0)
