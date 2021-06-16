@@ -489,14 +489,19 @@ CALL GSTATS(1808,1)
 !     ------------------------------------------------------------------
 
 ! TODO : Add all other copyin/copyout
+#ifdef USE_CUDA_AWARE_MPI_EFTDIR
 !$ACC data copyin (PGP) if (present (PGP))
+#endif
 !$ACC data copyout (PSPSCALAR) if (present (PSPSCALAR))
 CALL EDIR_TRANS_CTL(IF_UV_G,IF_SCALARS_G,IF_GP,IF_FS,IF_UV,IF_SCALARS,&
  & PSPVOR,PSPDIV,PSPSCALAR,KVSETUV,KVSETSC,PGP,&
  & PSPSC3A,PSPSC3B,PSPSC2,KVSETSC3A,KVSETSC3B,KVSETSC2,PGPUV,PGP3A,PGP3B,PGP2,&
  & PMEANU,PMEANV,AUX_PROC)
 !$ACC end data
+#ifdef USE_CUDA_AWARE_MPI_EFTDIR
 !$ACC end data
+#endif
+
 IF (LHOOK) CALL DR_HOOK('EDIR_TRANS',1,ZHOOK_HANDLE)
 
 !     ------------------------------------------------------------------
