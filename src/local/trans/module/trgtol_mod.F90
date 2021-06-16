@@ -567,13 +567,6 @@ MODULE TRGTOL_MOD
       ENDDO
   
   
-!     IF(.not. LLPGPONLY) THEN
-!        stop("Error: only LLPGPONLY is supported on GPU as yet")
-!     END IF
-  
-  
-  
-  
       !$acc parallel loop
       DO JJ=ISEND_FLD_START(ISEND),ISEND_FLD_END
         IFLDT=IFLDA(JJ)
